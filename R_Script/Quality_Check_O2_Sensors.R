@@ -26,9 +26,9 @@ date      <- "2023-05-10"
 
 ## Condition 
 if (date == "2023-05-08") { 
-  condition <- "T0_ELOW" } else if (date == "2023-05-09") { 
-    condition <- "T0_LOW" } else if (date == "2023-05-10") { 
-      condition <- "T0_AMB" } else {
+  condition <- "T0 – ELOW" } else if (date == "2023-05-09") { 
+    condition <- "T0 – LOW" } else if (date == "2023-05-10") { 
+      condition <- "T0 – AMB" } else {
         condition <- NA }
 
 #####################
