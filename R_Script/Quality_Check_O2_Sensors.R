@@ -95,6 +95,7 @@ legend_tile_position <- data.frame(x = min_limits_x$min, y = max_limits_y - 1, l
 
 ### First Viz
 
+# Dark respiration
 dark_respiration_viz <- ggplot() + theme_classic() +
   scale_y_continuous(name = "O2 concentration (mg/L)", limits = c(min_limits_y$min, max_limits_y$max))
 for (i in 1:8) { dark_respiration_viz = dark_respiration_viz + 
@@ -105,6 +106,7 @@ dark_respiration_viz <- dark_respiration_viz + scale_x_datetime(name = "Time (UT
         plot.title = element_text(size = 16)) +
   ggtitle("Dark respiration")
 
+# Net photosynthesis
 net_photosynthesis_viz <- ggplot() + theme_classic() +
   scale_y_continuous(name = "O2 concentration (mg/L)", limits = c(min_limits_y$min, max_limits_y$max))
 for (i in 1:8) { net_photosynthesis_viz = net_photosynthesis_viz + 
@@ -115,6 +117,7 @@ net_photosynthesis_viz <- net_photosynthesis_viz + scale_x_datetime(name = "Time
         plot.title = element_text(size = 16)) +
   ggtitle("Net photosynthesis")
 
+# Community observed
 legend_plot <- ggplot(data_tile_position, aes(x = x, y = max, label = label, fill = label)) + geom_label() +
   scale_fill_manual(values = colors) + 
   annotate("text", x = legend_tile_position$x + step_time, y = legend_tile_position$max, label = legend_tile_position$label, size = 6) +
@@ -122,6 +125,7 @@ legend_plot <- ggplot(data_tile_position, aes(x = x, y = max, label = label, fil
   scale_y_continuous(limits = c(floor_dec(legend_tile_position$max, 2), ceiling_dec(legend_tile_position$max, 2))) +
   theme_void() + theme(legend.position="none")
 
+# Quality check
 (Quality_check <- (dark_respiration_viz + net_photosynthesis_viz) / legend_plot + plot_annotation(title = paste(date, condition, sep = " – ")) +
     plot_layout(heights = c(5, 1)) +
     theme(plot.margin = unit(rep(0.5,4),"cm")))
