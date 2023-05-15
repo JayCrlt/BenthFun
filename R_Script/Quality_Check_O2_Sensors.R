@@ -9,7 +9,7 @@ Diving_log <- read_excel("Data/Spring_2023/Diving_log_Spring_2023_BenthFun.xlsx"
          Stop_Alkalinity = format(as.POSIXct(Stop_Alkalinity), format = "%H:%M:%S"))
 
 # 3 minutes mismatch 
-minutes_mismatch = 3 * 60
+minutes_mismatch = 0 * 60
 
 # Useful functions
 floor_dec   <- function(x, level=1) round(x - 5*10^(-level-1), level)
@@ -19,6 +19,7 @@ ceiling_dec <- function(x, level=1) round(x + 5*10^(-level-1), level)
 colors = c("red", "orange", "brown", "lightblue", "lightgreen", "limegreen", "darkgreen", "cornflowerblue")
 
 #####################
+
 ## Incubation Date ##
 #####################
 
@@ -79,6 +80,8 @@ for (O2_sensor_used in 1:8) {
   dark_respiration[[O2_sensor_used]]$Time = strptime(paste(date, dark_respiration[[O2_sensor_used]]$Time, sep = " "), "%Y-%m-%d %H:%M:%S") 
 }
 
+
+
 ## Set the plots limits 
 max_limits_y <- net_photosynthesis %>% bind_rows() %>% summarise(max = max(O2))
 min_limits_y <- dark_respiration %>% bind_rows() %>% summarise(min = min(O2))
@@ -129,3 +132,62 @@ legend_plot <- ggplot(data_tile_position, aes(x = x, y = max, label = label, fil
 (Quality_check <- (dark_respiration_viz + net_photosynthesis_viz) / legend_plot + plot_annotation(title = paste(date, condition, sep = " – ")) +
     plot_layout(heights = c(5, 1)) +
     theme(plot.margin = unit(rep(0.5,4),"cm")))
+
+## Define the respiration rate
+
+dark_respiration_rates = vector("list", 8) ; respiration_rates_df = vector("list", 8)
+for (i in 1:8) {
+  dark_respiration_rates[[i]] <- rbind(dark_respiration[[i]] %>% slice_min(O2, n = 3) %>% slice(1:3), 
+                                       dark_respiration[[i]] %>% slice_max(O2, n = 3) %>% slice(1:3))
+# making all combinations (3 x 3)
+  respiration_rates_df[[i]]   <- data.frame(Time_difference  = c(difftime(dark_respiration_rates[[i]]$Time[1], dark_respiration_rates[[i]]$Time[6]),
+                                                                 difftime(dark_respiration_rates[[i]]$Time[1], dark_respiration_rates[[i]]$Time[5]),
+                                                                 difftime(dark_respiration_rates[[i]]$Time[1], dark_respiration_rates[[i]]$Time[4]),
+                                                                 difftime(dark_respiration_rates[[i]]$Time[2], dark_respiration_rates[[i]]$Time[6]),
+                                                                 difftime(dark_respiration_rates[[i]]$Time[2], dark_respiration_rates[[i]]$Time[5]),
+                                                                 difftime(dark_respiration_rates[[i]]$Time[2], dark_respiration_rates[[i]]$Time[4]),
+                                                                 difftime(dark_respiration_rates[[i]]$Time[3], dark_respiration_rates[[i]]$Time[6]),
+                                                                 difftime(dark_respiration_rates[[i]]$Time[3], dark_respiration_rates[[i]]$Time[5]),
+                                                                 difftime(dark_respiration_rates[[i]]$Time[3], dark_respiration_rates[[i]]$Time[4])),
+                                            O2_Concentration = c(dark_respiration_rates[[i]]$O2[1] - dark_respiration_rates[[i]]$O2[6],
+                                                                 dark_respiration_rates[[i]]$O2[1] - dark_respiration_rates[[i]]$O2[5],
+                                                                 dark_respiration_rates[[i]]$O2[1] - dark_respiration_rates[[i]]$O2[4],
+                                                                 dark_respiration_rates[[i]]$O2[2] - dark_respiration_rates[[i]]$O2[6],
+                                                                 dark_respiration_rates[[i]]$O2[2] - dark_respiration_rates[[i]]$O2[5],
+                                                                 dark_respiration_rates[[i]]$O2[2] - dark_respiration_rates[[i]]$O2[4],
+                                                                 dark_respiration_rates[[i]]$O2[3] - dark_respiration_rates[[i]]$O2[6],
+                                                                 dark_respiration_rates[[i]]$O2[3] - dark_respiration_rates[[i]]$O2[5],
+                                                                 dark_respiration_rates[[i]]$O2[3] - dark_respiration_rates[[i]]$O2[4]))
+  respiration_rates_df[[i]]   <- respiration_rates_df[[i]] %>% slice_max(Time_difference, n = 3) %>% 
+    mutate(respiration_rate = O2_Concentration / as.numeric(Time_difference, units = "hours")) %>% 
+    slice_max(respiration_rate, n = 3)}
+
+## Define the photosynthesis rate
+
+net_photosynthesis_rates = vector("list", 8) ; photosynthesis_rates_df = vector("list", 8)
+for (i in 1:8) {
+  net_photosynthesis_rates[[i]] <- rbind(net_photosynthesis[[i]] %>% slice_max(O2, n = 3) %>% slice(1:3), 
+                                         net_photosynthesis[[i]] %>% slice_min(O2, n = 3) %>% slice(1:3)) 
+  # making all combinations (3 x 3)
+  photosynthesis_rates_df[[i]]   <- data.frame(Time_difference  = c(difftime(net_photosynthesis_rates[[i]]$Time[1], net_photosynthesis_rates[[i]]$Time[6]),
+                                                                    difftime(net_photosynthesis_rates[[i]]$Time[1], net_photosynthesis_rates[[i]]$Time[5]),
+                                                                    difftime(net_photosynthesis_rates[[i]]$Time[1], net_photosynthesis_rates[[i]]$Time[4]),
+                                                                    difftime(net_photosynthesis_rates[[i]]$Time[2], net_photosynthesis_rates[[i]]$Time[6]),
+                                                                    difftime(net_photosynthesis_rates[[i]]$Time[2], net_photosynthesis_rates[[i]]$Time[5]),
+                                                                    difftime(net_photosynthesis_rates[[i]]$Time[2], net_photosynthesis_rates[[i]]$Time[4]),
+                                                                    difftime(net_photosynthesis_rates[[i]]$Time[3], net_photosynthesis_rates[[i]]$Time[6]),
+                                                                    difftime(net_photosynthesis_rates[[i]]$Time[3], net_photosynthesis_rates[[i]]$Time[5]),
+                                                                    difftime(net_photosynthesis_rates[[i]]$Time[3], net_photosynthesis_rates[[i]]$Time[4])),
+                                               O2_Concentration = c(net_photosynthesis_rates[[i]]$O2[1] - net_photosynthesis_rates[[i]]$O2[6],
+                                                                    net_photosynthesis_rates[[i]]$O2[1] - net_photosynthesis_rates[[i]]$O2[5],
+                                                                    net_photosynthesis_rates[[i]]$O2[1] - net_photosynthesis_rates[[i]]$O2[4],
+                                                                    net_photosynthesis_rates[[i]]$O2[2] - net_photosynthesis_rates[[i]]$O2[6],
+                                                                    net_photosynthesis_rates[[i]]$O2[2] - net_photosynthesis_rates[[i]]$O2[5],
+                                                                    net_photosynthesis_rates[[i]]$O2[2] - net_photosynthesis_rates[[i]]$O2[4],
+                                                                    net_photosynthesis_rates[[i]]$O2[3] - net_photosynthesis_rates[[i]]$O2[6],
+                                                                    net_photosynthesis_rates[[i]]$O2[3] - net_photosynthesis_rates[[i]]$O2[5],
+                                                                    net_photosynthesis_rates[[i]]$O2[3] - net_photosynthesis_rates[[i]]$O2[4]))
+  photosynthesis_rates_df[[i]]   <- photosynthesis_rates_df[[i]] %>% slice_max(Time_difference, n = 3) %>% 
+    mutate(photosynthesis_rate = O2_Concentration / as.numeric(Time_difference, units = "hours")) %>% 
+    slice_max(photosynthesis_rate, n = 3)}
+
