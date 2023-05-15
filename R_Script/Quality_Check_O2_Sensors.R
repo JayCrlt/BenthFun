@@ -102,7 +102,8 @@ legend_tile_position <- data.frame(x = min_limits_x$min, y = max_limits_y - 1, l
 dark_respiration_viz <- ggplot() + theme_classic() +
   scale_y_continuous(name = "O2 concentration (mg/L)", limits = c(min_limits_y$min, max_limits_y$max))
 for (i in 1:8) { dark_respiration_viz = dark_respiration_viz + 
-  geom_point(data = dark_respiration[[i]], aes(x = as.POSIXct(Time + 7200, format = "%H:%M:%S"), y = O2), fill = colors[i], col = "black", size = 2, shape = 21) }
+  geom_point(data = dark_respiration[[i]], aes(x = as.POSIXct(Time + 7200, format = "%H:%M:%S"), y = O2), 
+             fill = colors[i], col = "black", size = 2, shape = 21) }
 dark_respiration_viz <- dark_respiration_viz + scale_x_datetime(name = "Time (UTC + 2:00)", breaks = "30 min", labels = scales::date_format("%H:%M")) + 
   theme(axis.text = element_text(size = 12), 
         axis.title = element_text(size = 14, face = "bold"),
@@ -113,7 +114,8 @@ dark_respiration_viz <- dark_respiration_viz + scale_x_datetime(name = "Time (UT
 net_photosynthesis_viz <- ggplot() + theme_classic() +
   scale_y_continuous(name = "O2 concentration (mg/L)", limits = c(min_limits_y$min, max_limits_y$max))
 for (i in 1:8) { net_photosynthesis_viz = net_photosynthesis_viz + 
-  geom_point(data = net_photosynthesis[[i]], aes(x = as.POSIXct(Time + 7200, format = "%H:%M:%S"), y = O2), fill = colors[i], col = "black", size = 2, shape = 21) }
+  geom_point(data = net_photosynthesis[[i]], aes(x = as.POSIXct(Time + 7200, format = "%H:%M:%S"), y = O2), 
+             fill = colors[i], col = "black", size = 2, shape = 21) }
 net_photosynthesis_viz <- net_photosynthesis_viz + scale_x_datetime(name = "Time (UTC + 2:00)", breaks = "30 min", labels = scales::date_format("%H:%M")) + 
   theme(axis.text = element_text(size = 12), 
         axis.title = element_text(size = 14, face = "bold"),
@@ -134,7 +136,6 @@ legend_plot <- ggplot(data_tile_position, aes(x = x, y = max, label = label, fil
     theme(plot.margin = unit(rep(0.5,4),"cm")))
 
 ## Define the respiration rate
-
 dark_respiration_rates = vector("list", 8) ; respiration_rates_df = vector("list", 8)
 for (i in 1:8) {
   dark_respiration_rates[[i]] <- rbind(dark_respiration[[i]] %>% slice_min(O2, n = 3) %>% slice(1:3), 
@@ -163,7 +164,6 @@ for (i in 1:8) {
     slice_max(respiration_rate, n = 3)}
 
 ## Define the photosynthesis rate
-
 net_photosynthesis_rates = vector("list", 8) ; photosynthesis_rates_df = vector("list", 8)
 for (i in 1:8) {
   net_photosynthesis_rates[[i]] <- rbind(net_photosynthesis[[i]] %>% slice_max(O2, n = 3) %>% slice(1:3), 
@@ -191,3 +191,56 @@ for (i in 1:8) {
     mutate(photosynthesis_rate = O2_Concentration / as.numeric(Time_difference, units = "hours")) %>% 
     slice_max(photosynthesis_rate, n = 3)}
 
+### Compiling data
+mean_value_photo = vector("list", 8) ; mean_value_respi = vector("list", 8)  ;for (i in 1:8) {
+  mean_value_photo[[i]] <- photosynthesis_rates_df[[i]] %>% 
+    summarise(net_photosynthesis_rate_avg = mean(photosynthesis_rate), net_photosynthesis_rate_sd = sd(photosynthesis_rate))
+  mean_value_respi[[i]] <- respiration_rates_df[[i]] %>% 
+    summarise(respiration_rate_avg = mean(respiration_rate), respiration_rate_sd = sd(respiration_rate))}
+
+compiled_data <- cbind(mean_value_respi %>% bind_rows(), mean_value_photo %>% bind_rows()) %>% mutate(Tile = data_tile_position$label)
+
+### Correct with the blank
+## Respiration avg
+compiled_data$respiration_rate_avg[1] = compiled_data$respiration_rate_avg[1] - compiled_data$respiration_rate_avg[4]
+compiled_data$respiration_rate_avg[2] = compiled_data$respiration_rate_avg[2] - compiled_data$respiration_rate_avg[4]
+compiled_data$respiration_rate_avg[3] = compiled_data$respiration_rate_avg[3] - compiled_data$respiration_rate_avg[4]
+compiled_data$respiration_rate_avg[5] = compiled_data$respiration_rate_avg[5] - compiled_data$respiration_rate_avg[8]
+compiled_data$respiration_rate_avg[6] = compiled_data$respiration_rate_avg[6] - compiled_data$respiration_rate_avg[8]
+compiled_data$respiration_rate_avg[7] = compiled_data$respiration_rate_avg[7] - compiled_data$respiration_rate_avg[8]
+
+## photosynthesis avg
+compiled_data$net_photosynthesis_rate_avg[1] = compiled_data$net_photosynthesis_rate_avg[1] - compiled_data$net_photosynthesis_rate_avg[4]
+compiled_data$net_photosynthesis_rate_avg[2] = compiled_data$net_photosynthesis_rate_avg[2] - compiled_data$net_photosynthesis_rate_avg[4]
+compiled_data$net_photosynthesis_rate_avg[3] = compiled_data$net_photosynthesis_rate_avg[3] - compiled_data$net_photosynthesis_rate_avg[4]
+compiled_data$net_photosynthesis_rate_avg[5] = compiled_data$net_photosynthesis_rate_avg[5] - compiled_data$net_photosynthesis_rate_avg[8]
+compiled_data$net_photosynthesis_rate_avg[6] = compiled_data$net_photosynthesis_rate_avg[6] - compiled_data$net_photosynthesis_rate_avg[8]
+compiled_data$net_photosynthesis_rate_avg[7] = compiled_data$net_photosynthesis_rate_avg[7] - compiled_data$net_photosynthesis_rate_avg[8]
+
+## Respiration sd
+compiled_data$respiration_rate_sd[1] = sqrt(compiled_data$respiration_rate_sd[1]^2 + compiled_data$respiration_rate_sd[4]^2)
+compiled_data$respiration_rate_sd[2] = sqrt(compiled_data$respiration_rate_sd[2]^2 + compiled_data$respiration_rate_sd[4]^2)
+compiled_data$respiration_rate_sd[3] = sqrt(compiled_data$respiration_rate_sd[3]^2 + compiled_data$respiration_rate_sd[4]^2)
+compiled_data$respiration_rate_sd[5] = sqrt(compiled_data$respiration_rate_sd[5]^2 + compiled_data$respiration_rate_sd[8]^2)
+compiled_data$respiration_rate_sd[6] = sqrt(compiled_data$respiration_rate_sd[6]^2 + compiled_data$respiration_rate_sd[8]^2)
+compiled_data$respiration_rate_sd[7] = sqrt(compiled_data$respiration_rate_sd[7]^2 + compiled_data$respiration_rate_sd[8]^2)
+
+## photosynthesis sd
+compiled_data$net_photosynthesis_rate_sd[1] = sqrt(compiled_data$net_photosynthesis_rate_sd[1]^2 + compiled_data$net_photosynthesis_rate_sd[4]^2)
+compiled_data$net_photosynthesis_rate_sd[2] = sqrt(compiled_data$net_photosynthesis_rate_sd[2]^2 + compiled_data$net_photosynthesis_rate_sd[4]^2)
+compiled_data$net_photosynthesis_rate_sd[3] = sqrt(compiled_data$net_photosynthesis_rate_sd[3]^2 + compiled_data$net_photosynthesis_rate_sd[4]^2)
+compiled_data$net_photosynthesis_rate_sd[5] = sqrt(compiled_data$net_photosynthesis_rate_sd[5]^2 + compiled_data$net_photosynthesis_rate_sd[8]^2)
+compiled_data$net_photosynthesis_rate_sd[6] = sqrt(compiled_data$net_photosynthesis_rate_sd[6]^2 + compiled_data$net_photosynthesis_rate_sd[8]^2)
+compiled_data$net_photosynthesis_rate_sd[7] = sqrt(compiled_data$net_photosynthesis_rate_sd[7]^2 + compiled_data$net_photosynthesis_rate_sd[8]^2)
+
+### Gross photosynthesis
+compiled_data = compiled_data %>% mutate(gross_photosynthesis_rate_avg = net_photosynthesis_rate_avg - respiration_rate_avg,
+                                         gross_photosynthesis_rate_sd  = sqrt(net_photosynthesis_rate_sd^2 + respiration_rate_sd^2),
+                                         Condition = rep(condition,8)) %>% 
+  dplyr::select(Condition, Tile, net_photosynthesis_rate_avg, net_photosynthesis_rate_sd, gross_photosynthesis_rate_avg, gross_photosynthesis_rate_sd,
+                respiration_rate_avg, respiration_rate_sd)
+
+compiled_data = compiled_data[-c(4,8),]
+
+### Exporting the data
+xlsx::write.xlsx(compiled_data, file = paste("Outputs/Tables/", condition, ".xlsx", sep = ""), row.names = FALSE)
