@@ -3,7 +3,8 @@ rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(p
 ### Diving_Log
 Diving_log <- read_excel("Data/Spring_2023/Diving_log_Spring_2023_BenthFun.xlsx", 
                          col_types = c("date", "text", "text", "date", "date", 
-                                       "date", "text", "text", "numeric", "numeric")) %>% 
+                                       "date", "text", "text", "numeric", "numeric"),
+                         sheet = "Corrected") %>% 
   mutate(., Start_incubation = format(as.POSIXct(Start_incubation), format = "%H:%M:%S"), 
          Stop_Incubation = format(as.POSIXct(Stop_Incubation), format = "%H:%M:%S"), 
          Stop_Alkalinity = format(as.POSIXct(Stop_Alkalinity), format = "%H:%M:%S"))
@@ -23,7 +24,7 @@ colors = c("red", "orange", "brown", "lightblue", "lightgreen", "limegreen", "da
 ## Incubation Date ##
 #####################
 
-date      <- "2023-05-10"
+date      <- "2023-05-08"
 
 ## Condition 
 if (date == "2023-05-08") { 
