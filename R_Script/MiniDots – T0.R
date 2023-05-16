@@ -1,4 +1,4 @@
-rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
+options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
 
 # Working with O2 sensors outputs
 Folder <- "Outputs/Tables"
@@ -24,27 +24,3 @@ Summary_O2 = Summary_O2 %>% group_by(Tile) %>% mutate(Tile = factor(Tile, levels
 Summary_O2$pH_cond[Summary_O2$pH_cond == " AMB"] = "ambient pH conditions"
 Summary_O2$pH_cond[Summary_O2$pH_cond == " ELOW"] = "extreme low pH conditions"
 Summary_O2$pH_cond[Summary_O2$pH_cond == " LOW"] = "low pH conditions"
-
-T0_minidots <- ggplot(Summary_O2, aes(avg_output, label)) +
-  geom_errorbarh(aes(xmin = 0, xmax = avg_output, color = pH_cond), height = 0, position = position_dodge(width = .7), lty = 1) +
-  geom_point(aes(fill = pH_cond, shape = Process), size = 3, position = position_dodge(width = .7)) +
-  geom_vline(lty = 1, xintercept = 0) +
-  theme_dark() + guides(fill="none") +
-  scale_fill_manual(values = c("royalblue3", "gold", "red"), breaks = c("ambient pH conditions", "low pH conditions", "extreme low pH conditions")) +
-  scale_color_manual(values = c("royalblue3", "gold", "red"), breaks = c("ambient pH conditions", "low pH conditions", "extreme low pH conditions")) +
-  scale_shape_manual(values = c(21,22,23)) +
-  guides(color = guide_legend(title = "Tiles located after \n incubation in"), shape = guide_legend(title = "Process measured")) +
-  scale_y_discrete(labels = c("", "Tile 19", "", "", "Tile 04", "", "", "Tile 07", "", "", "Tile 05", "", "", "Tile 01", "", "", "Tile 06",
-                              "", "", "Tile 28", "", "", "Tile 12", "", "", "Tile 02", "", "", "Tile 14", "", "", "Tile 09", "", "", "Tile 11",
-                              "", "", "Tile 08", "", "", "Tile 03", "", "", "Tile 29", "", "", "Tile 10", "", "", "Tile 13", "", "", "Tile 18", ""),
-                   name = "") +
-  scale_x_continuous(name = expression(O[2]~"concentration (mg."*h^-1*")")) +
-  theme(axis.text = element_text(size = 12), 
-        axis.title = element_text(size = 14, face = "bold"),
-        plot.title = element_text(size = 16),
-        panel.grid.major = element_line(NA),
-        panel.grid.minor = element_line(NA),
-        axis.ticks.y = element_line(NA),
-        panel.border = element_rect(linetype = "solid", fill = NA, colour = "black")) +
-  ggtitle("Before transplantation (i.e., each tile has been incubated in ambient pH conditions)")
-  
