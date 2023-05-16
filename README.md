@@ -5,16 +5,16 @@ is organized as follows:
 
 1️⃣ [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data) folder hosts the data Because the project will be split into two temporal seasons (i.e., between summer and after summer), you might find one subfolder for[`spring`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023) and another for fall (*coming soon...*). The spring season understands three majors experiments:
 
-\- [`Transplants`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023/Transplants)
-You might fing 2 crucial documents:
-🧪 [Alkalinity analyses](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023/Transplants/Alkalinity)
-🤿 [`Diving_log`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023)
+\- [`Transplant experiment`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023/Transplants) \
+You might find 2 crucial documents: \
+🧪 [`Alkalinity analyses`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023/Transplants/Alkalinity) \
+🤿 [`Diving_log`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023) \
 
 \- `Historic tiles` *coming soon...*
 
 \- `PI Curves` *coming soon...*
 
-2️⃣ [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main outputs for further analyses \
+2️⃣ [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main outputs for further analyse.s \
 Once again, you might find different sub-folders (i.e., main interesting figures, summary tables and intermediate outputs such as tables)
 
 3️⃣ `R_Script` hosts the scripts used for the current analyses.\
