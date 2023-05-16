@@ -2,7 +2,7 @@
 
 This repository hosts the main `BenthFun project` documents. So far, it is organized as follows:
 
-1️⃣ [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data) folder hosts the data Because the project will be split into two temporal seasons (i.e., between summer and after summer), you might find one subfolder for[`spring`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023) and another for fall (*coming soon...*). The spring season understands three majors experiments:
+1️⃣ [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data) folder hosts the data Because the project will be split into two temporal seasons (i.e., between summer and after summer), you might find one subfolder for [`spring`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023) and another for fall (*coming soon...*). The spring season understands three majors experiments:
 
 \- [`Transplant experiment`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023/Transplants) hosts mostly all the data. You might find 2 crucial documents that we will use almost along this campaign (*i.e.,* 🧪 [`Alkalinity analyses`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023/Transplants/Alkalinity) and 🤿 [`Diving_log`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023))
 
