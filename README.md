@@ -34,10 +34,11 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1]  readxl_1.4.2    patchwork_1.1.2 lubridate_1.9.2 forcats_1.0.0   stringr_1.5.0   
-[6]  dplyr_1.1.0     purrr_1.0.1     readr_2.1.4     tidyr_1.3.0     tibble_3.2.0    
+[1]  readxl_1.4.2    patchwork_1.1.2   lubridate_1.9.2   forcats_1.0.0   stringr_1.5.0   
+[6]  dplyr_1.1.0     purrr_1.0.1       readr_2.1.4       tidyr_1.3.0     tibble_3.2.0    
 [11] ggplot2_3.4.1   tidyverse_2.0.0
 ```
 
 ---
-Main collaborators: Samir Alliouane, Jordi Boada, Jeremy Carlot, Antonia Chiarore, Steeve Comeau, Jean-Pierre Gattuso, Alice Mirasole, Melissa Palmisciano, Nuria Teixido
+
+**Main collaborators**: Samir Alliouane, Jordi Boada, Jeremy Carlot, Antonia Chiarore, Steeve Comeau, Jean-Pierre Gattuso, Alice Mirasole, Melissa Palmisciano, Nuria Teixido
