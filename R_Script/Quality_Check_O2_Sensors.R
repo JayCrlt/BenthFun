@@ -82,8 +82,6 @@ for (O2_sensor_used in 1:8) {
   dark_respiration[[O2_sensor_used]]$Time = strptime(paste(date, dark_respiration[[O2_sensor_used]]$Time, sep = " "), "%Y-%m-%d %H:%M:%S") 
 }
 
-
-
 ## Set the plots limits 
 max_limits_y <- net_photosynthesis %>% bind_rows() %>% summarise(max = max(O2))
 min_limits_y <- dark_respiration %>% bind_rows() %>% summarise(min = min(O2))
