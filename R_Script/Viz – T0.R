@@ -66,5 +66,5 @@ Process_T0 <- T0_minidots + T0_Alkalinity + plot_layout(guides = "collect") +
                                                                                        "net photosynthesis rate", "calcifcation rate"))
 
 # Exporting important informations
-xlsx::write.xlsx(Summary_T0 %>% as.data.frame() %>% dplyr::select(-label), "Outputs/Summary/Summary_Process_T0.xlsx", row.names = FALSE)
+# xlsx::write.xlsx(Summary_T0 %>% as.data.frame() %>% dplyr::select(-label), "Outputs/Summary/Summary_Process_T0.xlsx", row.names = FALSE)
 ggsave(Process_T0, filename = "Process_T0.png", path = "Outputs/Figures", device = "png", width = 12, height = 6) 
