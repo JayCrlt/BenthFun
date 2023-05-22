@@ -24,13 +24,14 @@ colors = c("red", "orange", "brown", "lightblue", "lightgreen", "limegreen", "da
 ## Incubation Date ##
 #####################
 
-date      <- "2023-05-10"
+date      <- "2023-05-22"
 
 ## Condition 
 if (date == "2023-05-08") { 
   condition <- "T0 – ELOW" } else if (date == "2023-05-09") { 
     condition <- "T0 – LOW" } else if (date == "2023-05-10") { 
-      condition <- "T0 – AMB" } else {
+      condition <- "T0 – AMB" } else if (date == "2023-05-22") {
+        condition <- "T1 – ELOW" } else {
         condition <- NA }
 
 #####################
