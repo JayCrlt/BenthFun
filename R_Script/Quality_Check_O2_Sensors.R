@@ -190,7 +190,8 @@ for (i in 1:8) {
                                                                     net_photosynthesis_rates[[i]]$O2[3] - net_photosynthesis_rates[[i]]$O2[4]))
   photosynthesis_rates_df[[i]]   <- photosynthesis_rates_df[[i]] %>% slice_max(Time_difference, n = 3) %>% 
     mutate(photosynthesis_rate = O2_Concentration / as.numeric(Time_difference, units = "hours")) %>% 
-    slice_max(photosynthesis_rate, n = 3)}
+    slice_max(photosynthesis_rate, n = 3) %>% 
+    mutate(Time_difference = abs(Time_difference))}
 
 ### Compiling data
 mean_value_photo = vector("list", 8) ; mean_value_respi = vector("list", 8)  ;for (i in 1:8) {
