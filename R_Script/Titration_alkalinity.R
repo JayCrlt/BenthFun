@@ -5,8 +5,8 @@
 rm(list = ls()) ; options(digits = 9, cores = 4, warn = -1)
 library(hms) ; library(tidyverse) ; library(seacarb) ; library(stringr) ; library(readr)
 
-calibration <- read.table("Data/Spring_2023/Transplants/Alkalinitycalibration_TRIS.csv", 
-                          dec = ".", sep = ";", na.strings = "na")
+calibration <- read.csv("Data/Spring_2023/Transplants/Alkalinity/calibration_TRIS.csv", 
+                          dec = ",", sep = ";")
 
 m0 <- as.numeric(readline("What is the sample's weight?"))
 S  <- as.numeric(readline("What is the sample's salinity?"))
@@ -15,19 +15,19 @@ S  <- as.numeric(readline("What is the sample's salinity?"))
 # Reading the databases: 
 #################################################################
 
-mVTris = calibration$V5[length(calibration$V5)]
-pHTris = calibration$V7[length(calibration$V7)]
+mVTris = calibration$mV[length(calibration$mV)]
+pHTris = calibration$pH[length(calibration$pH)]
 At <- NULL
 
 Folder <- "Data/Spring_2023/Transplants/Alkalinity/Titration_exports"
-file  <- list.files(paste(getwd(), Folder, sep = "/"))
+file  <- list.files(Folder)
 
 list_files  <- NULL 
 list_files  <- c(list_files, t) 
 sample_name <- NULL
 
 # Files from the titrator
-for (file in file) { l <- read.csv(file, fileEncoding = "UCS-2LE", skip = 17, sep = "\t")
+for (file in file) { l <- read.csv(paste(Folder, file, sep = "/"), fileEncoding = "UCS-2LE", skip = 17, sep = "\t")
 
 p  <- l %>% as_tibble() %>% 
   rename(Volume = mL, mV = mV, `mV/mL` = mV.mL, Time = s, temp = X.C, dV = mL.1, dE = mV.1, X = X) %>% 
