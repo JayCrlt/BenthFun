@@ -1,0 +1,31 @@
+Date / Time;12/05/2023 18:19;;;;;
+User name;Administrator;;;;;
+Method ID;U8000;;;;;
+;;;;;;
+Loop;1 of 1;;;;;
+Sample;1 of 1;;;;;
+;;;;;;
+ID 1;TILE4b;;;;;
+Sample size;50;mL;;;;
+Density;1;g/mL;;;;
+Correction factor;1;;;;;
+;;;;;;
+R1;Consumption;NaN;mL;;;
+R2;Consumption;NaN;mL;;;
+;;;;;;
+Table of measured values Titration (EQP) [1];;;;;;
+Volume;Meas. value;1.Derivative;Time;Temperature;dV;dE
+mL;mV;mV/mL;s;°C;mL;mV
+0;-63.7;NaN;0;21.4;NaN;NaN
+1.5;211;NaN;46;21.3;1.5;274.7
+1.525;213.9;NaN;262;20.8;0.025;2.9
+1.55;216.5;NaN;277;20.8;0.025;2.6
+1.575;218.8;NaN;292;20.8;0.025;2.3
+1.6;221;85.5;308;20.8;0.025;2.2
+1.625;223;76.02;324;20.7;0.025;2
+1.65;224.8;71.08;339;20.7;0.025;1.8
+1.675;226.5;NaN;354;20.7;0.025;1.7
+1.7;228.1;NaN;369;20.7;0.025;1.6
+1.725;229.7;NaN;384;20.7;0.025;1.6
+1.75;231.1;NaN;399;20.7;0.025;1.4
+1.775;232.4;NaN;415;20.7;0.025;1.3
