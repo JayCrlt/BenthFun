@@ -24,7 +24,7 @@ Folder <- "Data/Spring_2023/Transplants/Alkalinity/Titration_exports"
 file  <- list.files(Folder)
 
 list_files  <- NULL 
-list_files  <- c(list_files, t) 
+list_files  <- c(list_files, file) 
 sample_name <- NULL
 
 # Files from the titrator
@@ -102,8 +102,9 @@ At          <- append(At, coefs[1])
 sample_name <- append(sample_name, p[1, 8])
 }
 
-Results <- cbind(At * 1000000, list_files)
-write.table(Results, "Data/Spring_2023/Transplants/Alkalinity/Results_TA/Results_TA.csv", sep="\t")
+Results <- cbind(At * 1000000, list_files) %>% as_tibble() %>% rename(At = V1) %>% dplyr::select(list_files, At)
+write.table(Results, "Data/Spring_2023/Transplants/Alkalinity/Results_TA/Results_TA.csv", sep = ";", col.names = TRUE,
+            row.names = FALSE)
 print(paste("The alkalinity of your sample is: ", (At * 1000000), sep = ""))
 
 # usefull fumctions
