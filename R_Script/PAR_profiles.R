@@ -39,5 +39,38 @@ A <- ggplot(Light_Activity[[1]], aes(x = Datetime, y = calibrated_value)) +
   geom_point(aes(fill = sensor_used), shape = 21, size = 3, alpha = .7) +
   geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", fx = TRUE, k = 15), 
               linetype = "dashed", size = 0.5, col = "black", se = F) +
-  scale_x_datetime(name = "") + scale_y_continuous(name = "Light intensity (units)") +
-  theme_classic() + ggtitle("Extreme Low conditions")
+  scale_x_datetime(name = "", limits = as.POSIXct(strptime(c("2023-05-29 06:00:00", "2023-05-29 21:00:00"), 
+                                                           format = "%Y-%m-%d %H:%M:%S")), 
+                   breaks = scales::date_breaks("3 hour"), labels = scales::date_format("%H:%M")) + 
+  scale_y_continuous(name = "Light intensity (units)", limits = c(0,600)) +
+  theme_classic() + ggtitle("Extreme Low conditions") +
+  guides(fill = guide_legend(title = "Light sensor used:")) +
+  scale_fill_discrete(labels=c('Light Sensor N°1', 'Light Sensor N°2'))
+
+B <- ggplot(Light_Activity[[2]], aes(x = Datetime, y = calibrated_value)) + 
+  geom_point(aes(fill = sensor_used), shape = 21, size = 3, alpha = .7) +
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", fx = TRUE, k = 25), 
+              linetype = "dashed", size = 0.5, col = "black", se = F) +
+  scale_x_datetime(name = "", limits = as.POSIXct(strptime(c("2023-05-30 06:00:00", "2023-05-30 21:00:00"), 
+                                                           format = "%Y-%m-%d %H:%M:%S")), 
+                   breaks = scales::date_breaks("3 hour"), labels = scales::date_format("%H:%M")) + 
+  scale_y_continuous(name = "", limits = c(0,600)) +
+  theme_classic() + ggtitle("Low conditions") +
+  guides(fill = guide_legend(title = "Light sensor used:")) +
+  scale_fill_discrete(labels=c('Light Sensor N°1', 'Light Sensor N°2')) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+C <- ggplot(Light_Activity[[3]], aes(x = Datetime, y = calibrated_value)) + 
+  geom_point(aes(fill = sensor_used), shape = 21, size = 3, alpha = .7) +
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", fx = TRUE, k = 10), 
+              linetype = "dashed", size = 0.5, col = "black", se = F) +
+  scale_x_datetime(name = "", limits = as.POSIXct(strptime(c("2023-05-31 06:00:00", "2023-05-31 21:00:00"), 
+                                                           format = "%Y-%m-%d %H:%M:%S")), 
+                   breaks = scales::date_breaks("3 hour"), labels = scales::date_format("%H:%M")) + 
+  scale_y_continuous(name = "", limits = c(0,600)) +
+  theme_classic() + ggtitle("Ambient conditions") +
+  guides(fill = guide_legend(title = "Light sensor used:")) +
+  scale_fill_discrete(labels=c('Light Sensor N°1', 'Light Sensor N°2')) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+Light_Profile_PI_Curves <- A + B + C + plot_layout(guides = "collect") & theme(legend.position = "bottom") 
