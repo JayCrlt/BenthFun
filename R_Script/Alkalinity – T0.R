@@ -22,7 +22,7 @@ if (Tile_concerned$Label[i] == "T0_t1_ELOW_tile_01") {
         Tile_concerned$Start_incubation[i] = Tile_concerned$Start_incubation[i] } }
 
 ### Alkalinity
-Alkalinity_dataset <- read_excel("Data/Spring_2023/Transplants/Alkalinity/BenthFun_Summary.xlsx") %>% 
+Alkalinity_dataset <- read_excel("Data/Spring_2023/BenthFun_Alkalinity.xlsx") %>% 
   drop_na(`Batch mean`) %>% dplyr::filter(`Sample id` != "CRM1") %>% 
   dplyr::select(-c(`ALK batch`, `delta batch`, note))
 
