@@ -117,8 +117,12 @@ Diving_log_PAR_barplot <- Diving_log_PAR |> dplyr::filter(Tile_N. != "<NA>") |>
 Diving_log_PAR_barplot <- Diving_log_PAR_barplot |> group_by(Incubation_Time, pH_Cond) |> 
   summarise(PAR_mean = mean(PAR_irradiance_mean), PAR_sd = mean(PAR_irradiance_sd))
 
-ggplot(Diving_log_PAR_barplot) + 
+PAR_Barplot <- Diving_log_PAR_barplot |> mutate(pH_Cond = fct_relevel(pH_Cond, "ELOW", "LOW", "AMB")) |> 
+  ggplot() + 
   geom_bar(aes(x = Incubation_Time, y = PAR_mean, fill = PAR_mean), stat = "identity", col = "black") + 
   geom_errorbar(aes(x = Incubation_Time, ymin = PAR_mean - PAR_sd, ymax = PAR_mean + PAR_sd), width = 0.2) +
-  facet_wrap(~pH_Cond) + theme_classic()
+  facet_wrap(~pH_Cond) + theme_classic() +
+  scale_y_continuous(name = expression("PAR irradiance (μmol."*m^-2*"."*s^-1*")"), breaks = seq(0,600,100)) +
+  scale_x_discrete(name = "") + guides(fill = guide_legend(title = "PAR irradiance"))
   
+## Generate a summary table for the PI curves
