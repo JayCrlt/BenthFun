@@ -104,7 +104,7 @@ sample_name <- append(sample_name, p[1, 8])
 
 Results <- cbind(At * 1000000, list_files) %>% as_tibble() %>% rename(At = V1) %>% dplyr::select(list_files, At)
 # write.table(Results, "Data/Spring_2023/Transplants/Alkalinity/Results_TA/Results_TA.csv", sep = ";", col.names = T, row.names = F)
-print(paste("The alkalinity of your sample is: ", round((At * 1000000), 2), sep = ""))
+print(paste("The alkalinity of your sample is: ", round((At * 1000000), 3), sep = ""))
 
 # usefull fumctions
 pH <- pHTris + (mVTris / 1000 - 211 / 1000) / (R * (Tk) * log(10) / F)
