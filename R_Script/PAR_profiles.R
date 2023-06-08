@@ -1,4 +1,4 @@
-rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
+#rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
 
 # Diving log
 Diving_log <- read_excel("Data/Spring_2023/Diving_log_Spring_2023_BenthFun.xlsx", 
@@ -58,7 +58,7 @@ A <- ggplot(Light_Activity[[1]], aes(x = Datetime, y = calibrated_value)) +
   scale_x_datetime(name = "", limits = as.POSIXct(strptime(c("2023-05-29 06:00:00", "2023-05-29 21:00:00"), 
                                                            format = "%Y-%m-%d %H:%M:%S")), 
                    breaks = scales::date_breaks("3 hour"), labels = scales::date_format("%H:%M")) + 
-  scale_y_continuous(name = "Light intensity (units)", limits = c(0,600)) +
+  scale_y_continuous(name = expression("PAR irradiance (μmol."*m^-2*"."*s^-1*")"), limits = c(0,600)) +
   theme_classic() + ggtitle("Extreme Low conditions") +
   guides(fill = guide_legend(title = "Light sensor used:")) +
   scale_fill_discrete(labels=c('Light Sensor N°1', 'Light Sensor N°2'))
@@ -131,17 +131,15 @@ Diving_log_PAR <- Diving_log_PAR |>
   mutate(incubation_time = difftime(Diving_log_PAR$Stop_Incubation, Diving_log_PAR$Start_incubation))
 
 ## pH
-
 # Constantes
 R = 8.31451 ; F = 96485.309 ; STris = 34.5
 ###Tris values at different temperature
-Tris_data = data.frame(mVTris = c(-63.7, -65.6, -67.0), TTris = c(20.1, 21.3, 22.4), Date = rep("19/05/2023",3))
+Tris_data = data.frame(mVTris = c(-89.5, -87.7, -86.2, -85.4), TTris = c(12.15, 13.98, 15.57, 16.27), Date = rep("07/06/2023",4))
 mVTris_t  = lm(mVTris ~ TTris, data = Tris_data) ; plot(Tris_data$TTris, Tris_data$mVTris) ; abline(mVTris_t)
-
 ####pH
-mvTris= Panarea_Campaign_080622_170622$T_IMEV * mVTris_t$coefficients[2] + mVTris_t$coefficients[1]
-phTris = (11911.08 - 18.2499 * STris - 0.039336 * STris^2) * (1/(Panarea_Campaign_080622_170622$T_IMEV + 273.15)) - 366.27059 + 
-  0.53993607 * STris + 0.00016329 * STris^2 + (64.52243 - 0.084041 * STris) * log(Panarea_Campaign_080622_170622$T_IMEV + 273.15) - 
-  0.11149858 * (Panarea_Campaign_080622_170622$T_IMEV + 273.15)
-Panarea_Campaign_080622_170622$`pH_logH+` = phTris + (mvTris / 1000 - Panarea_Campaign_080622_170622$pH_mV / 1000) /
-  (R * (Panarea_Campaign_080622_170622$T_IMEV + 273.15) * log(10) / F)
+mvTris= Diving_log_PAR$Temperature * mVTris_t$coefficients[2] + mVTris_t$coefficients[1]
+phTris = (11911.08 - 18.2499 * STris - 0.039336 * STris^2) * (1/(Diving_log_PAR$Temperature + 273.15)) - 366.27059 + 
+  0.53993607 * STris + 0.00016329 * STris^2 + (64.52243 - 0.084041 * STris) * log(Diving_log_PAR$Temperature + 273.15) - 
+  0.11149858 * (Diving_log_PAR$Temperature + 273.15)
+Diving_log_PAR$`pH_logH+` = phTris + (mvTris / 1000 - Diving_log_PAR$pH_mV / 1000) /
+  (R * (Diving_log_PAR$Temperature + 273.15) * log(10) / F)

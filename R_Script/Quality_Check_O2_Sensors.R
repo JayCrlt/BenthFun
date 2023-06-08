@@ -71,7 +71,7 @@ dark_respiration <- vector("list", length = 8) ; for (O2_sensor_used in 1:8) {
     dplyr::filter(., Time >= subset_diving_log[[1]]$Start_incubation[O2_sensor_used]) %>% 
     dplyr::filter(., Time <= subset_diving_log[[1]]$Stop_Incubation[O2_sensor_used])}
 
-# Dark_Respiration files
+# net_photosynthesis files
 net_photosynthesis <- vector("list", length = 8) ; for (O2_sensor_used in 1:8) {
   net_photosynthesis[[O2_sensor_used]] = files_O2[[O2_sensor_used]] %>% 
     mutate(Time = format(as.POSIXct(Time), format = "%H:%M:%S")) %>% 
