@@ -156,10 +156,7 @@ Diving_log_PAR_barplot <- Diving_log_PAR_barplot |> mutate(common_label = paste(
 Mix_dataset_PI_PAR <- Diving_log_PAR_barplot |> left_join(PI_Photosynthesis) |> 
   dplyr::select(-c(common_label, pH_cond, incubation_time))
 
-Mix_dataset_PI_PAR |> ggplot() +
-  geom_point(aes(x = PAR_mean, y = net_photosynthesis_rate_avg, color = Tile_N.), size = 3) + facet_wrap(~pH_Cond)
-
-# Ambient model
+# Amb model
 Mix_dataset_PI_PAR_AMB <- Mix_dataset_PI_PAR |> dplyr::filter(pH_Cond == "AMB")
 NLS_AMB <- nls(formula = net_photosynthesis_rate_avg ~ a * (1 - b * (exp(-c * PAR_mean))),
     data = Mix_dataset_PI_PAR_AMB,
@@ -178,3 +175,66 @@ NLS_LOW <- nls(formula = net_photosynthesis_rate_avg ~ a * (1 - b * (exp(-c * PA
 Observed_values = Mix_dataset_PI_PAR_LOW$net_photosynthesis_rate_avg
 Predicted_values = predict(NLS_LOW, Mix_dataset_PI_PAR_LOW)
 R2_LOW = 1-sum((Observed_values - Predicted_values)^2) / (length(Observed_values) * var(Observed_values))
+
+# Low model
+Mix_dataset_PI_PAR_ELOW <- Mix_dataset_PI_PAR |> dplyr::filter(pH_Cond == "ELOW")
+NLS_ELOW <- nls(formula = net_photosynthesis_rate_avg ~ a * (1 - b * (exp(-c * PAR_mean))),
+               data = Mix_dataset_PI_PAR_ELOW,
+               start = list(a = 5, b = 1.5, c = 0.005))
+
+Observed_values = Mix_dataset_PI_PAR_ELOW$net_photosynthesis_rate_avg
+Predicted_values = predict(NLS_ELOW, Mix_dataset_PI_PAR_ELOW)
+R2_ELOW = 1-sum((Observed_values - Predicted_values)^2) / (length(Observed_values) * var(Observed_values))
+
+### Predictions
+Predicted_df <- data.frame(PAR_mean = seq(0,600,1))
+Predicted_df <- Predicted_df |> mutate(photo_predicted_ELOW = predict(NLS_ELOW, Predicted_df),
+                                       photo_predicted_LOW  = predict(NLS_LOW, Predicted_df),
+                                       photo_predicted_AMB  = predict(NLS_AMB, Predicted_df))
+
+Mix_dataset_PI_PAR = Mix_dataset_PI_PAR |> mutate(Tile_N. = factor(Tile_N., levels = c(2, 9, 18, 10,19, 29, 4, 8, 14)))
+Mix_dataset_PI_PAR_curves = Mix_dataset_PI_PAR |> group_by(pH_Cond) |> group_split()
+
+PI_ELOW <- ggplot(Mix_dataset_PI_PAR_curves[[2]]) + 
+  geom_line(data = Predicted_df, aes(x = PAR_mean, y = photo_predicted_ELOW), color = "firebrick", linewidth = 1, linetype = "dashed") +
+  geom_point(aes(x = PAR_mean, y = net_photosynthesis_rate_avg, fill = Tile_N.), shape = 21, color = "black", size = 3) + 
+  scale_fill_manual(values = c("firebrick1", "firebrick3", "darkred")) +
+  scale_x_continuous(name = expression("PAR irradiance (μmol."*m^-2*"."*s^-1*")"), limits = c(0,600)) +
+  scale_y_continuous(name = expression(O[2]~"concentration (mg."*L^-1*h^-1*")"), limits = c(-4,10)) +
+  theme_classic() + ggtitle("Extreme Low conditions") +
+  theme(axis.text = element_text(size = 15),
+        axis.title = element_text(size = 17),
+        legend.text = element_text(size = 15),
+        title = element_text(size = 17)) +
+  annotate('text', 50, 10, label = expression("y" == "3.13 × (1 - 1.61 × exp"^(0.007 * x)*")"), parse = TRUE, hjust = 0) +
+  annotate('text', 50, 9, label = expression("R"^2 == "0.52"), parse = TRUE, hjust = 0)
+
+PI_LOW <- ggplot(Mix_dataset_PI_PAR_curves[[3]]) + 
+  geom_line(data = Predicted_df, aes(x = PAR_mean, y = photo_predicted_LOW), color = "orange", linewidth = 1, linetype = "dashed") +
+  geom_point(aes(x = PAR_mean, y = net_photosynthesis_rate_avg, fill = Tile_N.), shape = 21, color = "black", size = 3) + 
+  scale_fill_manual(values = c("gold", "goldenrod", "goldenrod4")) +
+  scale_x_continuous(name = expression("PAR irradiance (μmol."*m^-2*"."*s^-1*")"), limits = c(0,600)) +
+  scale_y_continuous(name = expression(O[2]~"concentration (mg."*L^-1*h^-1*")"), limits = c(-4,10)) +
+  theme_classic() + ggtitle("Low conditions") +
+  theme(axis.text = element_text(size = 15),
+        axis.title = element_text(size = 17),
+        title = element_text(size = 17),
+        legend.text = element_text(size = 15)) +
+  annotate('text', 50, 10, label = expression("y" == "6.94 × (1 - 1.32 × exp"^(0.007 * x)*")"), parse = TRUE, hjust = 0) +
+  annotate('text', 50, 9, label = expression("R"^2 == "0.58"), parse = TRUE, hjust = 0)
+
+PI_AMB <- ggplot(Mix_dataset_PI_PAR_curves[[1]]) + 
+  geom_line(data = Predicted_df, aes(x = PAR_mean, y = photo_predicted_AMB), color = "royalblue", linewidth = 1, linetype = "dashed") +
+  geom_point(aes(x = PAR_mean, y = net_photosynthesis_rate_avg, fill = Tile_N.), shape = 21, color = "black", size = 3) + 
+  scale_fill_manual(values = c("dodgerblue", "dodgerblue3", "dodgerblue4")) +
+  scale_x_continuous(name = expression("PAR irradiance (μmol."*m^-2*"."*s^-1*")"), limits = c(0,600)) +
+  scale_y_continuous(name = expression(O[2]~"concentration (mg."*L^-1*h^-1*")"), limits = c(-4,10)) +
+  theme_classic() + ggtitle("Ambient conditions") +
+  theme(axis.text = element_text(size = 15),
+        axis.title = element_text(size = 17),
+        title = element_text(size = 17),
+        legend.text = element_text(size = 15)) +
+  annotate('text', 50, 10, label = expression("y" == "5.13 × (1 - 1.51 × exp"^(0.008 * x)*")"), parse = TRUE, hjust = 0) +
+  annotate('text', 50, 9, label = expression("R"^2 == "0.73"), parse = TRUE, hjust = 0)
+
+PI_ELOW + PI_LOW + PI_AMB + plot_layout(guides = "collect") & theme(legend.position = "bottom")
