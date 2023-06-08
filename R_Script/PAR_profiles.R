@@ -1,4 +1,4 @@
-#rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
+rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
 
 # Diving log
 Diving_log <- read_excel("Data/Spring_2023/Diving_log_Spring_2023_BenthFun.xlsx", 
@@ -8,6 +8,8 @@ Diving_log <- read_excel("Data/Spring_2023/Diving_log_Spring_2023_BenthFun.xlsx"
   mutate(Start_incubation = format(as.POSIXct(Start_incubation), format = "%H:%M:%S"), 
          Stop_Incubation = format(as.POSIXct(Stop_Incubation), format = "%H:%M:%S"), 
          Stop_Alkalinity = format(as.POSIXct(Stop_Alkalinity), format = "%H:%M:%S"))
+
+PI_Photosynthesis <- read_excel("Outputs/Tables/PI_Photosynthesis.xlsx")
 
 label_decomposition <- str_split(Diving_log$Label, fixed("_"))
 for (i in 1:length(label_decomposition)) {
@@ -143,3 +145,36 @@ phTris = (11911.08 - 18.2499 * STris - 0.039336 * STris^2) * (1/(Diving_log_PAR$
   0.11149858 * (Diving_log_PAR$Temperature + 273.15)
 Diving_log_PAR$`pH_logH+` = phTris + (mvTris / 1000 - Diving_log_PAR$pH_mV / 1000) /
   (R * (Diving_log_PAR$Temperature + 273.15) * log(10) / F)
+
+### PI Curve elaboration
+Diving_log_PAR_barplot
+PI_Photosynthesis
+
+PI_Photosynthesis <- PI_Photosynthesis |> mutate(common_label = paste(pH_cond, incubation_time, sep = "_"))
+Diving_log_PAR_barplot <- Diving_log_PAR_barplot |> mutate(common_label = paste(pH_Cond, Incubation_Time, sep = "_"))
+
+Mix_dataset_PI_PAR <- Diving_log_PAR_barplot |> left_join(PI_Photosynthesis) |> 
+  dplyr::select(-c(common_label, pH_cond, incubation_time))
+
+Mix_dataset_PI_PAR |> ggplot() +
+  geom_point(aes(x = PAR_mean, y = net_photosynthesis_rate_avg, color = Tile_N.), size = 3) + facet_wrap(~pH_Cond)
+
+# Ambient model
+Mix_dataset_PI_PAR_AMB <- Mix_dataset_PI_PAR |> dplyr::filter(pH_Cond == "AMB")
+NLS_AMB <- nls(formula = net_photosynthesis_rate_avg ~ a * (1 - b * (exp(-c * PAR_mean))),
+    data = Mix_dataset_PI_PAR_AMB,
+    start = list(a = 5, b = 1.5, c = 0.005))
+
+Observed_values = Mix_dataset_PI_PAR_AMB$net_photosynthesis_rate_avg
+Predicted_values = predict(NLS_AMB, Mix_dataset_PI_PAR_AMB)
+R2_AMB = 1-sum((Observed_values - Predicted_values)^2) / (length(Observed_values) * var(Observed_values))
+
+# Low model
+Mix_dataset_PI_PAR_LOW <- Mix_dataset_PI_PAR |> dplyr::filter(pH_Cond == "LOW")
+NLS_LOW <- nls(formula = net_photosynthesis_rate_avg ~ a * (1 - b * (exp(-c * PAR_mean))),
+               data = Mix_dataset_PI_PAR_LOW,
+               start = list(a = 5, b = 1.5, c = 0.005))
+
+Observed_values = Mix_dataset_PI_PAR_LOW$net_photosynthesis_rate_avg
+Predicted_values = predict(NLS_LOW, Mix_dataset_PI_PAR_LOW)
+R2_LOW = 1-sum((Observed_values - Predicted_values)^2) / (length(Observed_values) * var(Observed_values))
