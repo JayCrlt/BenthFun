@@ -10,7 +10,7 @@ calibration <- read.csv("Data/Spring_2023/Transplants/Alkalinity/calibration_TRI
 
 m0 <- as.numeric(readline("What is the sample's weight?"))
 # TO CHANGE IF CRM USED !!!
-S  <- 38
+S  <- 33.29
 
 #################################################################
 # Reading the databases: 
