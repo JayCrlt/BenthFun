@@ -43,8 +43,7 @@ Several scripts have been written so far:
 ---
 
 #### ⚠️ You can also find important documents in: 
-#### - our [`Google Drive folder`](https://drive.google.com/drive/folders/1BJ00Iwx9btY_OodlrvSJEIK__TQmfPbR) 
-#### - our [`pCloud drive folder`](https://my.pcloud.com/#page=filemanager&folder=6370075431&tpl=folderlist) 
+[`Google Drive`](https://drive.google.com/drive/folders/1BJ00Iwx9btY_OodlrvSJEIK__TQmfPbR) OR [`pCloud`](https://my.pcloud.com/#page=filemanager&folder=6370075431&tpl=folderlist) 
 
 ---
 System informations
