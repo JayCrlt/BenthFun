@@ -1,7 +1,7 @@
 rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
 
 # Diving log
-Diving_log <- read_excel("Data/Spring_2023/Diving_log_Spring_2023_BenthFun.xlsx", 
+Diving_log <- read_excel("Data/1. Diving log/Diving_log_BenthFun.xlsx", 
                          col_types = c("date", "text", "text", "date", "date", 
                                        "date", "text", "text", "numeric", "numeric"),
                          sheet = "Corrected") |> 
@@ -21,7 +21,7 @@ Diving_log_PAR <- Diving_log |> dplyr::filter(`Stage experiment` == "PI")
 # Functions
 `%notin%` <- Negate(`%in%`)
 
-Folder         <- "Data/Spring_2023/PI_Curves/Light"
+Folder         <- "Data/2. Incubations/PI_Curves/Light"
 document_files <- list.files(paste(getwd(), Folder, sep = "/"))
 
 files_PAR = list() ; for (i in 1:length(document_files)) {
@@ -147,9 +147,6 @@ Diving_log_PAR$`pH_logH+` = phTris + (mvTris / 1000 - Diving_log_PAR$pH_mV / 100
   (R * (Diving_log_PAR$Temperature + 273.15) * log(10) / F)
 
 ### PI Curve elaboration
-Diving_log_PAR_barplot
-PI_Photosynthesis
-
 PI_Photosynthesis <- PI_Photosynthesis |> mutate(common_label = paste(pH_cond, incubation_time, sep = "_"))
 Diving_log_PAR_barplot <- Diving_log_PAR_barplot |> mutate(common_label = paste(pH_Cond, Incubation_Time, sep = "_"))
 

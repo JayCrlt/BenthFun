@@ -1,7 +1,7 @@
 rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
 
 ### Diving_Log
-Diving_log <- read_excel("Data/Spring_2023/Diving_log_Spring_2023_BenthFun.xlsx", 
+Diving_log <- read_excel("Data/1. Diving log/Diving_log_BenthFun.xlsx", 
                          col_types = c("date", "text", "text", "date", "date", 
                                        "date", "text", "text", "numeric", "numeric"),
                          sheet = "Corrected") %>% 
@@ -39,7 +39,7 @@ if (date == "2023-05-08") {
 #####################
 
 # Set differents paths
-Folder         <- paste("Data/Spring_2023/Transplants/O2", date, sep ="/")
+Folder         <- paste("Data/2. Incubations/Transplants/O2", date, sep ="/")
 document_files <- list.files(paste(getwd(), Folder, sep = "/"))
 files_O2 = list() ; for (i in 1:length(document_files)) {
   files_O2[[i]]           <- read.csv(paste(Folder, document_files[i], sep = "/"), header=T)

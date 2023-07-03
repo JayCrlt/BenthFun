@@ -5,8 +5,7 @@
 rm(list = ls()) ; options(digits = 9, cores = 4, warn = -1)
 library(hms) ; library(tidyverse) ; library(seacarb) ; library(stringr) ; library(readr)
 
-calibration <- read.csv("Data/Spring_2023/Transplants/Alkalinity/calibration_TRIS.csv", 
-                          dec = ",", sep = ";")
+calibration <- read.csv("Data/3. Alkalinity/Alkalinity_setup/calibration_TRIS.csv", dec = ",", sep = ";")
 
 m0 <- as.numeric(readline("What is the sample's weight?"))
 # TO CHANGE IF CRM USED !!!
@@ -20,7 +19,7 @@ mVTris = calibration$mV[length(calibration$mV)]
 pHTris = calibration$pH[length(calibration$pH)]
 At <- NULL
 
-Folder <- "Data/Spring_2023/Transplants/Alkalinity/Titration_exports"
+Folder <- "Data/3. Alkalinity/Titration_exports"
 file  <- list.files(Folder)
 
 list_files  <- NULL 
