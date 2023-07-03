@@ -1,20 +1,36 @@
 # BenthFun
 
-This repository hosts the main `BenthFun project` documents. So far, it is organized as follows:
+This repository hosts the main `BenthFun project` documents. The fieldwork will be split in two campaigns 🤿 (i.e., spring 🍃 2023 and fall 🍂 2023) and the repository is organized in 3 folders as follows:
 
-1️⃣ [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data) folder hosts the data Because the project will be split into two temporal seasons (i.e., between summer and after summer), you might find one subfolder for [`spring`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023) and another for fall (*coming soon...*). The spring season understands three majors experiments:
+📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data) is the folder where you might find the data needed to run the analysis.
+This folder is organized itself as follows:
+0️⃣ [Fieldwork documents to print](https://github.com/JayCrlt/BenthFun/tree/main/Data/0.%20Fieldwork%20documents%20to%20print) – This sub-folder is used to store the lab and underwater document to print.
+1️⃣ [Diving log](https://github.com/JayCrlt/BenthFun/tree/main/Data/1.%20Diving%20log) – This sub-folder hosts the dates and hours of each dive. It is the cornerstone for each script written.
+2️⃣ [Incubations](https://github.com/JayCrlt/BenthFun/tree/main/Data/2.%20Incubations) – This sub-folder contains the 3 main experiments folders. Each of them contains O2 and light data organized by incubation day.
+The three mains experiments are: a) Transplants, b) Historic and c) PI Curves. More information will be added on this later.
+3️⃣ [Alkalinity](https://github.com/JayCrlt/BenthFun/tree/main/Data/3.%20Alkalinity) – This sub-folderhas been used to determine the total alkalinity of each sample. The protocole is coming from the [IMEV – LOV](https://lov.imev-mer.fr/web/)
+4️⃣ [Visual census](https://github.com/JayCrlt/BenthFun/tree/main/Data/4.%20Visual%20census) – this last sub-folder contains information about tile biodiversity and cover, an xlsx file to convert cover to biomass regarding the species observed and a masterclass led by Nuria Teixido and Antonia Chiarore in order to ID benthic species.
 
-\- [`Transplant experiment`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023/Transplants) hosts mostly all the data. You might find 2 crucial documents that we will use almost along this campaign (*i.e.,* 🧪 [`Alkalinity analyses`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023/Transplants/Alkalinity) and 🤿 [`Diving_log`](https://github.com/JayCrlt/BenthFun/tree/main/Data/Spring_2023))
+📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main outputs for further analyses. 
+You might find the main figures, summary table and intermediate tables defined from analyses to generate summaries and figures.
 
-\- `Historic tiles` *coming soon...*
+📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
+Several scripts have been written so far:
 
-\- `PI Curves` *coming soon...*
+**O2 Data**
+- `Quality_Check_O2_Sensors` is the first script to use. It allows us to check the O2 data quality from each incubation and to extract intermediate tables in the Outputs folder.
+- `MiniDots` will be used then to summarize O2 data for each experiment (e.g., Transplants at T0, Transplants at T1)
 
-2️⃣ [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main outputs for further analyse.s \
-Once again, you might find different sub-folders (i.e., main interesting figures, summary tables and intermediate outputs such as tables)
+**Calcification**
+- `Titration_alkalinity` is used to defined the total alkalinity (TA) from the titration done in the lab
+- `Alkalinity` is used to convert TA to calcification or dissolution rates
 
-3️⃣ [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
-So far, there are 4 scripts. The first one I worked on (*i.e.*,`Quality_Check_O2_Sensors.R`) allows me to check quickly if something is wrong with the oxygen measures. The two following scripts (*i.e.*,`Alkalinity – T0.R` and `MiniDots. – T0.R`) do not deserved to be open. They will be sourced directly in the last script (*i.e.*, `Viz – T0.R`) and be run silently to provides useful plots
+**Light influence**
+- `PI_Photo` is used to look at the PAR profile during the PI curve experiment
+- `PAR_Profiles` is used to define the PI curves and to vizualise them
+
+**Viz**
+- `Viz` will be used to load each script and to provides the figures
 
 ---
 System informations
@@ -41,4 +57,4 @@ other attached packages:
 
 ---
 
-**Main collaborators**: Samir Alliouane, Jordi Boada, Jeremy Carlot, Antonia Chiarore, Steeve Comeau, Jean-Pierre Gattuso, Alice Mirasole, Melissa Palmisciano, Nuria Teixido
+**Main collaborators**: Samir Alliouane, Jordi Boada, Jérémy Carlot, Antonia Chiarore, Steeve Comeau, Jean-Pierre Gattuso, Alice Mirasole, Melissa Palmisciano, Nuria Teixido
