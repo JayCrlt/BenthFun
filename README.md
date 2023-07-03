@@ -1,5 +1,10 @@
 # BenthFun
 
+![GitHub](https://img.shields.io/badge/GitHub-39457E?style=for-the-badge&logo=github&logoColor=white)
+![Gitlab](https://img.shields.io/badge/GitLab-FFA500?style=for-the-badge&logo=gitlab&logoColor=white)
+![RStudio](https://img.shields.io/badge/RStudio-75AADB?style=for-the-badge&logo=RStudio&logoColor=white)
+![Google Drive](https://img.shields.io/badge/Google%20Drive-FCD535?style=for-the-badge&logo=googledrive&logoColor=white)
+
 This repository hosts the main `BenthFun project` documents. The fieldwork will be split into two campaigns 🤿 (i.e., spring 🍃 2023 and fall 🍂 2023) and the repository is organized into 3 folders as follows:
 
 📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data) is the folder where you might find the data needed to run the analysis 💻.
@@ -23,7 +28,7 @@ Several scripts have been written so far:
 - `MiniDots` will be used then to summarize O2 🫁 data for each experiment 🔬 (e.g., Transplants at T0, Transplants at T1).
 
 **Calcification**
-- `Titration_alkalinity` is used to define the total alkalinity (TA) from the titration done in the lab 👩‍🔬.
+- `Titration_alkalinity` is used to define the total alkalinity (TA) from the lab titrations 👩‍🔬.
 - `Alkalinity` is used to convert TA to calcification or dissolution rates 🐚.
 
 **Light influence**
@@ -32,6 +37,10 @@ Several scripts have been written so far:
 
 **Viz**
 - `Viz` will be used to load each script and to provide the figures 📊
+
+---
+
+⚠️ You can also find important document in the [`Google Drive folder`](https://drive.google.com/drive/folders/1BJ00Iwx9btY_OodlrvSJEIK__TQmfPbR) and in the [`pCloud drive folder`](https://my.pcloud.com/#page=filemanager&folder=6370075431&tpl=folderlist)
 
 ---
 System informations
