@@ -4,11 +4,11 @@ This repository hosts the main `BenthFun project` documents. The fieldwork will 
 
 📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data) is the folder where you might find the data needed to run the analysis.
 This folder is organized itself as follows:
-0️⃣ [Fieldwork documents to print](https://github.com/JayCrlt/BenthFun/tree/main/Data/0.%20Fieldwork%20documents%20to%20print) – This sub-folder is used to store the lab and underwater document to print.
-1️⃣ [Diving log](https://github.com/JayCrlt/BenthFun/tree/main/Data/1.%20Diving%20log) – This sub-folder hosts the dates and hours of each dive. It is the cornerstone for each script written.
-2️⃣ [Incubations](https://github.com/JayCrlt/BenthFun/tree/main/Data/2.%20Incubations) – This sub-folder contains the 3 main experiments folders. Each of them contains O2 and light data organized by incubation day.
-The three mains experiments are: a) Transplants, b) Historic and c) PI Curves. More information will be added on this later.
-3️⃣ [Alkalinity](https://github.com/JayCrlt/BenthFun/tree/main/Data/3.%20Alkalinity) – This sub-folderhas been used to determine the total alkalinity of each sample. The protocole is coming from the [IMEV – LOV](https://lov.imev-mer.fr/web/)
+0️⃣ [Fieldwork documents to print](https://github.com/JayCrlt/BenthFun/tree/main/Data/0.%20Fieldwork%20documents%20to%20print) – This sub-folder is used to store the lab and underwater document to print. \n
+1️⃣ [Diving log](https://github.com/JayCrlt/BenthFun/tree/main/Data/1.%20Diving%20log) – This sub-folder hosts the dates and hours of each dive. It is the cornerstone for each script written. \n
+2️⃣ [Incubations](https://github.com/JayCrlt/BenthFun/tree/main/Data/2.%20Incubations) – This sub-folder contains the 3 main experiments folders. Each of them contains O2 and light data organized by incubation day. \n
+The three mains experiments are: a) Transplants, b) Historic and c) PI Curves. More information will be added on this later. \n
+3️⃣ [Alkalinity](https://github.com/JayCrlt/BenthFun/tree/main/Data/3.%20Alkalinity) – This sub-folderhas been used to determine the total alkalinity of each sample. The protocole is coming from the [IMEV – LOV](https://lov.imev-mer.fr/web/) \n
 4️⃣ [Visual census](https://github.com/JayCrlt/BenthFun/tree/main/Data/4.%20Visual%20census) – this last sub-folder contains information about tile biodiversity and cover, an xlsx file to convert cover to biomass regarding the species observed and a masterclass led by Nuria Teixido and Antonia Chiarore in order to ID benthic species.
 
 📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main outputs for further analyses. 
