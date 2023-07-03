@@ -5,6 +5,8 @@
 ![RStudio](https://img.shields.io/badge/RStudio-75AADB?style=for-the-badge&logo=RStudio&logoColor=white)
 ![Google Drive](https://img.shields.io/badge/Google%20Drive-FCD535?style=for-the-badge&logo=googledrive&logoColor=white)
 
+![alt text](https://github.com/JayCrlt/BenthFun/blob/main/Pictures/Incubations.JPG)
+
 This repository hosts the main `BenthFun project` documents. The fieldwork will be split into two campaigns 🤿 (i.e., spring 🍃 2023 and fall 🍂 2023) and the repository is organized into 3 folders as follows:
 
 📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data) is the folder where you might find the data needed to run the analysis 💻.
@@ -40,7 +42,9 @@ Several scripts have been written so far:
 
 ---
 
-### ⚠️ You can also find important document in the [`Google Drive folder`](https://drive.google.com/drive/folders/1BJ00Iwx9btY_OodlrvSJEIK__TQmfPbR) and in the [`pCloud drive folder`](https://my.pcloud.com/#page=filemanager&folder=6370075431&tpl=folderlist) ⚠️ 
+#### ⚠️ You can also find important documents in: 
+#### - our [`Google Drive folder`](https://drive.google.com/drive/folders/1BJ00Iwx9btY_OodlrvSJEIK__TQmfPbR) 
+#### - our [`pCloud drive folder`](https://my.pcloud.com/#page=filemanager&folder=6370075431&tpl=folderlist) 
 
 ---
 System informations
