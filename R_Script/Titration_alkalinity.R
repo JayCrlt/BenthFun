@@ -10,6 +10,7 @@ calibration <- read.csv("Data/3. Alkalinity/Alkalinity_setup/calibration_TRIS.cs
 m0 <- as.numeric(readline("What is the sample's weight?"))
 # TO CHANGE IF CRM USED !!!
 S  <- 38
+#S <- 33.29
 
 #################################################################
 # Reading the databases: 
@@ -102,7 +103,6 @@ sample_name <- append(sample_name, p[1, 8])
 }
 
 Results <- cbind(At * 1000000, list_files) %>% as_tibble() %>% rename(At = V1) %>% dplyr::select(list_files, At)
-# write.table(Results, "Data/Spring_2023/Transplants/Alkalinity/Results_TA/Results_TA.csv", sep = ";", col.names = T, row.names = F)
 print(paste("The alkalinity of your sample is: ", round((At * 1000000), 2), sep = ""))
 
 # usefull fumctions
