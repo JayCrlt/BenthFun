@@ -27,11 +27,6 @@ Summary$Main_Exp[is.na(Summary$Main_Exp)] = "Transplants"
 Summary$Tile[is.na(Summary$Tile)] = "A5"
 Summary = Summary %>% group_by(Main_Exp) %>% group_split()
 
-## Define the ranking
-Tile_ranking <- Summary_O2_historic %>% dplyr::filter(incub_time == "Tn1 ", Process == "net photosynthesis rate") %>% arrange(-avg_output)
-Summary_O2_historic = Summary_O2_historic %>% group_by(Tile) %>% mutate(Tile = factor(Tile, levels = rev(Tile_ranking$Tile))) %>% arrange(Tile) %>% 
-  mutate(label = paste(Tile, Process, sep = " "))
-
 # Historical
 Historic_minidots <- Summary[[1]] %>% dplyr::filter(., Process != "calcifcation rate") %>% 
   ggplot(., aes(avg_output, Tile)) +
@@ -129,7 +124,12 @@ Process_Transplants <- Transplants_minidots / Transplants_Alkalinity + plot_layo
   scale_shape_manual(name = "Process measured", values = c(21, 22, 23, 24), limits = c("dark respiration rate", "gross photosynthesis rate",
                                                                                        "net photosynthesis rate", "calcifcation rate"))
 
+# Final Dataset
+data_transplants <- data_transplants %>% select(-init_pH)
+data_historical  <- Summary[[1]]
+Summary <- rbind(data_transplants, data_historical)
+
 # Exporting important informations
-# xlsx::write.xlsx(Summary_T0 %>% as.data.frame() %>% dplyr::select(-label), "Outputs/Summary/Summary_Process_T0.xlsx", row.names = FALSE)
-ggsave(Process_Transplants, filename = "Process_Transplants_Total.png", path = "Outputs/Figures", device = "png", width = 12, height = 10) 
-ggsave(Process_Historic, filename = "Process_Historic_Total", path = "Outputs/Figures", device = "png", width = 7.5, height = 10) 
+xlsx::write.xlsx(Summary %>% as.data.frame(), "Outputs/Summary/Summary_Process_BenthFun.xlsx", row.names = FALSE)
+ggsave(Process_Transplants, filename = "Process_Transplants_Total.png", path = "Outputs/Figures/Processes_Panels", device = "png", width = 12, height = 10) 
+ggsave(Process_Historic, filename = "Process_Historic_Total", path = "Outputs/Figures/Processes_Panels", device = "png", width = 7.5, height = 10) 
