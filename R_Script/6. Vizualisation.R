@@ -1,8 +1,8 @@
 rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
 
 # Load previous scripts
-source("R_Script/Alkalinity.R")
-source("R_Script/MiniDots.R")
+source("R_Script/3. Alkalinity.R")
+source("R_Script/2. MiniDots.R")
 
 # Merging both datasets
 Alkalinity_dataset_cond <- Alkalinity_dataset_cond %>% 
