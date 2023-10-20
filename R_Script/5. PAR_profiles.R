@@ -9,7 +9,7 @@ Diving_log <- read_excel("Data/1. Diving log/Diving_log_BenthFun.xlsx",
          Stop_Incubation = format(as.POSIXct(Stop_Incubation), format = "%H:%M:%S"), 
          Stop_Alkalinity = format(as.POSIXct(Stop_Alkalinity), format = "%H:%M:%S"))
 
-PI_Photosynthesis <- read_excel("Outputs/Tables/PI_Photosynthesis.xlsx")
+PI_Photosynthesis <- read_excel("Outputs/Tables/PI/PI_Photosynthesis.xlsx")
 
 label_decomposition <- str_split(Diving_log$Label, fixed("_"))
 for (i in 1:length(label_decomposition)) {
@@ -234,4 +234,7 @@ PI_AMB <- ggplot(Mix_dataset_PI_PAR_curves[[1]]) +
   annotate('text', 50, 10, label = expression("y" == "5.13 × (1 - 1.51 × exp"^(0.008 * x)*")"), parse = TRUE, hjust = 0) +
   annotate('text', 50, 9, label = expression("R"^2 == "0.73"), parse = TRUE, hjust = 0)
 
-PI_ELOW + PI_LOW + PI_AMB + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+PI_Relationships <- PI_ELOW + PI_LOW + PI_AMB + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+
+# Export documents
+ggsave(PI_Relationships, filename = "PI_relationships.png", path = "Outputs/Figures/PI", device = "png", width = 12, height = 5) 
