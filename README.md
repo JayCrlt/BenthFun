@@ -5,7 +5,7 @@
 ![RStudio](https://img.shields.io/badge/RStudio-75AADB?style=for-the-badge&logo=RStudio&logoColor=white)
 ![Google Drive](https://img.shields.io/badge/Google%20Drive-FCD535?style=for-the-badge&logo=googledrive&logoColor=white)
 
-![alt text](https://github.com/JayCrlt/BenthFun/blob/main/Pictures/Incubations.JPG)
+![alt text](https://github.com/JayCrlt/BenthFun/blob/main/Meetings_and_Medias/Pictures/Incubations.JPG)
 
 This repository hosts the main `BenthFun project` documents. The fieldwork will be split into two campaigns 🤿 (i.e., spring 🍃 2023 and fall 🍂 2023) and the repository is organized into 3 folders as follows:
 
