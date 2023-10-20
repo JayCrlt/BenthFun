@@ -24,22 +24,49 @@ colors = c("red", "orange", "brown", "lightblue", "lightgreen", "limegreen", "da
 ## Incubation Date ##
 #####################
 
-date      <- "2023-05-25"
+dates <- c("2023-05-08", "2023-05-09", "2023-05-10", #T0 – Transplants
+           "2023-05-22", "2023-05-23", "2023-05-25", #T1 – Transplants
+           "2023-06-19", "2023-06-20", "2023-06-21", #T2 – Transplants
+           "2023-09-12", "2023-09-13", "2023-09-14", #T3 – Transplants
+           "2023-06-13", "2023-06-14", "2023-06-15", #Tn1 – Historical
+           "2023-09-19", "2023-09-18", "2023-09-15") #Tn2 – Historical
 
+for (date in dates) {
+
+  # Manual
+  # date = "2023-09-14"
+  
 ## Condition 
-if (date == "2023-05-08") { 
+### Transplanted Tiles
+                                if (date == "2023-05-08") { 
   condition <- "T0 – ELOW" } else if (date == "2023-05-09") { 
-    condition <- "T0 – LOW" } else if (date == "2023-05-10") { 
-      condition <- "T0 – AMB" } else if (date == "2023-05-22") {
+    condition <- "T0 – LOW" } else if (date  == "2023-05-10") { 
+      condition <- "T0 – AMB" } else if (date  == "2023-05-22") {
         condition <- "T1 – ELOW" } else if (date == "2023-05-23") {
-          condition <- "T1 – LOW" } else if (date == "2023-05-25") {
-            condition <- "T1 – AMB" } else { 
-              condition <- NA }
+          condition <- "T1 – LOW" } else if (date  == "2023-05-25") {  
+            condition <- "T1 – AMB" } else if (date  == "2023-06-19") { 
+              condition <- "T2 – ELOW" } else if (date == "2023-06-20") { 
+                condition <- "T2 – LOW" } else if (date  == "2023-06-21") {
+                  condition <- "T2 – AMB" } else if (date  == "2023-09-12") { 
+                    condition <- "T3 – ELOW" } else if (date == "2023-09-13") { 
+                      condition <- "T3 – LOW" } else if (date  == "2023-09-14") {
+                        condition <- "T3 – AMB" } else if (date  == "2023-06-13") { 
+                          ### Historic Tiles
+                          condition <- "Tn1 – ELOW" } else if (date == "2023-06-14") { 
+                            condition <- "Tn1 – LOW" } else if (date  == "2023-06-15") {
+                              condition <- "Tn1 – AMB" } else if (date  == "2023-09-19") { 
+                                condition <- "Tn2 – ELOW" } else if (date == "2023-09-18") { 
+                                  condition <- "Tn2 – LOW" } else if (date  == "2023-09-15") {
+                                    condition <- "Tn2 – AMB" } else {
+                                      condition <- NA }
 
 #####################
 
 # Set differents paths
-Folder         <- paste("Data/2. Incubations/Transplants/O2", date, sep ="/")
+if (date %in% c("2023-06-13", "2023-06-14", "2023-06-15", "2023-09-19", "2023-09-18", "2023-09-15")) {
+  Folder         <- paste("Data/2. Incubations/Historic/O2", date, sep ="/") } else {
+  Folder         <- paste("Data/2. Incubations/Transplants/O2", date, sep ="/")  
+  }
 document_files <- list.files(paste(getwd(), Folder, sep = "/"))
 files_O2 = list() ; for (i in 1:length(document_files)) {
   files_O2[[i]]           <- read.csv(paste(Folder, document_files[i], sep = "/"), header=T)
@@ -246,4 +273,12 @@ compiled_data = compiled_data %>% mutate(gross_photosynthesis_rate_avg = net_pho
 compiled_data = compiled_data[-c(4,8),]
 
 ### Exporting the data
-xlsx::write.xlsx(compiled_data, file = paste("Outputs/Tables/", condition, ".xlsx", sep = ""), row.names = FALSE)
+if (date %in% c("2023-06-13", "2023-06-14", "2023-06-15", "2023-09-19", "2023-09-18", "2023-09-15")) {
+  xlsx::write.xlsx(compiled_data, file = paste("Outputs/Tables/Historic/", condition, ".xlsx", sep = ""), row.names = FALSE)
+  ggsave(Quality_check, filename = paste("Outputs/Figures/Incubations_quality_check/Historic/", condition, ".png", sep = ""), width = 10, 
+         height = 6, units = "in", dpi = 300) } else {
+  xlsx::write.xlsx(compiled_data, file = paste("Outputs/Tables/Transplants/", condition, ".xlsx", sep = ""), row.names = FALSE)
+  ggsave(Quality_check, filename = paste("Outputs/Figures/Incubations_quality_check/Transplants/", condition, ".png", sep = ""), width = 10, 
+         height = 6, units = "in", dpi = 300) 
+  }
+}

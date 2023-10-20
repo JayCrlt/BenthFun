@@ -42,10 +42,14 @@ for (i in 1:length(label_decomposition)) {
 Alkalinity_dataset = Alkalinity_dataset %>% mutate(Label = substr(`Sample id`, 1, nchar(`Sample id`)-1)) %>% 
   left_join(., Tile_concerned) %>% dplyr::select(-Label) %>% 
   mutate(., Alkalinity_delta = rep(0, length(label_decomposition)), Alkalinity_delta_error = rep(0, length(label_decomposition)))
+
+### Remove PI experiment
+Alkalinity_dataset <- Alkalinity_dataset %>% dplyr::filter(`Stage experiment` != "PI")
+
 Alkalinity_dataset_cond = Alkalinity_dataset %>% group_by(`pH condition`) %>% group_split()
 
 for (j in 1:length(Alkalinity_dataset_cond)) {
-  for (i in 3:6) {
+  for (i in c(seq(3,6,1) + 0, + seq(3,6,1) + 10, + seq(3,6,1) + 20, + seq(3,6,1) + 30, + seq(3,6,1) + 40, + seq(3,6,1) + 50)) {
     Alkalinity_dataset_cond[[j]]$Alkalinity_delta[i] = Alkalinity_dataset_cond[[j]]$correction[i] - Alkalinity_dataset_cond[[j]]$correction[1] 
     Alkalinity_dataset_cond[[j]]$Alkalinity_delta_error[i] = sqrt(Alkalinity_dataset_cond[[j]]$`Batch sd`[i]^2 + Alkalinity_dataset_cond[[j]]$`Batch sd`[1]^2)
     # Correct with the blank chamber
@@ -53,7 +57,7 @@ for (j in 1:length(Alkalinity_dataset_cond)) {
     Alkalinity_dataset_cond[[j]]$Alkalinity_delta_error[i] = sqrt(Alkalinity_dataset_cond[[j]]$Alkalinity_delta_error[i]^2 + 
                                                                     Alkalinity_dataset_cond[[j]]$Alkalinity_delta_error[6]^2)
   }
-  for (i in 7:10) {
+  for (i in c(seq(7,10,1) + 0, + seq(7,10,1) + 10, + seq(7,10,1) + 20, + seq(7,10,1) + 30, + seq(7,10,1) + 40, + seq(7,10,1) + 50)) {
     Alkalinity_dataset_cond[[j]]$Alkalinity_delta[i] = Alkalinity_dataset_cond[[j]]$correction[i] - Alkalinity_dataset_cond[[j]]$correction[2] 
     Alkalinity_dataset_cond[[j]]$Alkalinity_delta_error[i] = sqrt(Alkalinity_dataset_cond[[j]]$`Batch sd`[i]^2 + Alkalinity_dataset_cond[[j]]$`Batch sd`[2]^2)
     # Correct with the blank chamber
@@ -75,3 +79,7 @@ Alkalinity_dataset_cond$`pH condition`[Alkalinity_dataset_cond$`pH condition` ==
 Alkalinity_dataset_cond$`pH condition`[Alkalinity_dataset_cond$`pH condition` == "ELOW"] = "extreme low pH conditions"
 Alkalinity_dataset_cond$`pH condition`[Alkalinity_dataset_cond$`pH condition` == "LOW"] = "low pH conditions"
 Alkalinity_dataset_cond$Process = rep("calcifcation rate", length(Alkalinity_dataset_cond$`Stage experiment`))
+
+## Reattribute NA value
+Alkalinity_dataset_cond$calcification_rate[Alkalinity_dataset_cond$calcification_rate > 1e05 | Alkalinity_dataset_cond$calcification_rate < -1e05] = NA
+Alkalinity_dataset_cond$calcifcation_rate_sd[Alkalinity_dataset_cond$calcifcation_rate_sd > 1e05 | Alkalinity_dataset_cond$calcifcation_rate_sd < -1e05] = NA
