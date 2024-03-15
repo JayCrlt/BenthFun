@@ -87,8 +87,7 @@ model_weibull = list(NA,NA,NA) ; for (i in 1:3) {
   model_weibull[[i]] <- brm(bf(Biomass_std ~ a - b * nb_days^c + 0, a ~ 1, b ~ 1, c ~ 1, nl = TRUE), iter = 5000, warmup = 1000,
                                data = model_split_data[[i]], family = gaussian(), cores = 4, chains = 4,
                                prior = c(prior(normal(1, 0.01), nlpar = "a"), prior(normal(1, 1), nlpar = "b"), prior(normal(1, 1), nlpar = "c")),
-                               control = list(adapt_delta = 0.95, max_treedepth = 10))
-}
+                               control = list(adapt_delta = 0.95, max_treedepth = 10))}
 
 training_data <- data.frame(nb_days = seq(0, 130, .1)) 
 weibull_AMB <- cbind(training_data, predict(model_weibull[[1]], training_data)) %>% mutate(pH = rep("AMB",  dim(training_data)[1]))
@@ -108,15 +107,17 @@ weibull_ELO <- weibull_ELO %>% mutate(Estimate_scaled = (Estimate - min(Estimate
 weibull_ELO$Q2.5[weibull_ELO$Q2.5 < 0] = 0
 
 # Combine everything
-rbind(weibull_AMB, weibull_LOW, weibull_ELO) %>% 
+Biomass_std <- rbind(weibull_AMB, weibull_LOW, weibull_ELO) %>% 
   mutate(pH = fct_relevel(pH, c("ELOW", "LOW", "AMB"))) %>%
   ggplot(aes(x = nb_days, y = Estimate, col = pH)) + 
   geom_ribbon(aes(x = nb_days, ymin = `Q2.5`, ymax = `Q97.5`, fill = pH), alpha = .5, size = .1, show.legend = F) + 
   theme_classic() +
   geom_segment(aes(x = 0, y = 1, xend = 130, yend = 1), colour = "black", linetype = "dotted", size = .5) +
   geom_line(aes(group = pH), size = .75) +
-  geom_point(data = Cover_biomass, aes(x = nb_days, y = Biomass_std, fill = pH), 
-             shape = 21, color = "black", alpha = .25, size = 2, show.legend = F) +
+  geom_jitter(data = Cover_biomass %>% dplyr::filter(Time != "T0"), aes(x = nb_days, y = Biomass_std, fill = pH), 
+             shape = 21, color = "black", alpha = .25, size = 2, show.legend = F, width = 2) +
+  geom_point(data = Cover_biomass %>% dplyr::filter(Time == "T0"), aes(x = nb_days, y = Biomass_std, fill = pH), 
+              shape = 21, color = "black", alpha = .25, size = 2, show.legend = F) +
   scale_color_manual(values=c("firebrick2","goldenrod1","royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) + 
   scale_fill_manual(values=c("firebrick2","goldenrod1","royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
   scale_y_continuous(name = expression("Standardized biomass"), breaks = seq(0, 1.4, 0.2), limits = c(0, 1.4)) + 
@@ -126,15 +127,12 @@ rbind(weibull_AMB, weibull_LOW, weibull_ELO) %>%
         legend.text     = element_text(size = 14),
         legend.title    = element_blank(),
         legend.position = "bottom")
- 
+
+Biomass_std = Biomass_std + plot_annotation(subtitle = expression(paste("R"^2, " = 0.82; Weibull regression: y" == "a – b • x"^c)), 
+                                            caption = expression(paste("T"[0], " = 0 day; ", "T"[1], " = 14 days; ", 
+                                                                       "T"[2], " = 42 days; ", "T"[3], " = 126 days")))
+
 model_perf <- brm(Biomass_std ~ nb_days | pH + 1, cores = 4, chains = 4, iter = 5000, warmup = 1000,
                   data = Cover_biomass, family = weibull(), inits = "0",
                   control = list(adapt_delta = 0.95, max_treedepth = 10))
 bayes_R2(model_perf)
-
-test_LOW <- cbind(model_split_data[[1]], predict(fit2, model_split_data[[1]]))
-ggplot(test_LOW, aes(x = nb_days, y = Estimate)) + geom_line(aes(group = Tile)) + geom_point(aes(color = pH, y = Biomass_std))
-    
-
-xlsx::write.xlsx(Cover_biomass %>% data.frame(), file = "Cover_biomass.xlsx")
-getwd()
