@@ -36,7 +36,6 @@ Tile_cover = bind_rows(Tile_cover)
 Tile_cover <- Tile_cover %>% left_join(corrected_names) %>% select(-Species) %>% 
   rename(Species = species_new) %>% filter(!grepl("dead", Species)) %>% 
   filter(Species != "tile")
-ggplot(Tile_cover, aes(x = Time, y = Cover, fill = Species)) + geom_bar(stat = "identity") + facet_wrap(~Tile)
 
 # Biomass
 ## Clean Biomass File #1
@@ -75,11 +74,6 @@ Cover_biomass = rbind(Biomass_avg, data_assumptions) %>% left_join(Tile_cover, b
 
 Cover_biomass_init = Cover_biomass %>% dplyr::filter(Time == "T0") %>% rename(Biomass_init = Biomass, Time_init = Time, nb_days_init = nb_days)
 Cover_biomass = Cover_biomass %>% left_join(Cover_biomass_init, by = c("pH", "Tile")) %>% mutate(Biomass_std = Biomass / Biomass_init) 
-
-i = 1
-(weibull_fit <- nls(Biomass_std ~ alpha - beta * nb_days^gamma,
-                   data = model_split_data[[i]],
-                   start = list(alpha = 1, beta = 0.1, gamma = 1)))
 
 # Modelling
 model_split_data <- Cover_biomass %>% group_by(pH) %>% group_split()
@@ -120,8 +114,9 @@ Biomass_std <- rbind(weibull_AMB, weibull_LOW, weibull_ELO) %>%
               shape = 21, color = "black", alpha = .25, size = 2, show.legend = F) +
   scale_color_manual(values=c("firebrick2","goldenrod1","royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) + 
   scale_fill_manual(values=c("firebrick2","goldenrod1","royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
-  scale_y_continuous(name = expression("Standardized biomass"), breaks = seq(0, 1.4, 0.2), limits = c(0, 1.4)) + 
-  scale_x_continuous(name = expression("Time experiment"), breaks = c(0, 14, 42, 126), labels = c("T0", "T1", "T2", "T3")) +
+  scale_y_continuous(name = expression("Standardized biomass"), breaks = seq(0, 1.2, 0.2), limits = c(0, 1.25), expand = c(0.02,0)) + 
+  scale_x_continuous(name = expression("Time experiment"), breaks = c(0, 14, 42, 126), 
+                     labels = c("T0", "T1", "T2", "T3"), expand = c(0.02,0)) +
   theme(axis.text       = element_text(size = 14),
         axis.title      = element_text(size = 16),
         legend.text     = element_text(size = 14),
