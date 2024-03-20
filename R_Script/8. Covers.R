@@ -201,7 +201,7 @@ Tile_cover$pH <- factor(Tile_cover$pH, levels = c("ELOW", "LOW", "AMB"))
 data_col = data_col %>% left_join(Legend_Light$data, by = "Species") %>% 
   select(functional.group, Species, Color.y) %>% rename(Color = Color.y)
 
-Species_order <- c("non-alive", "Turf", "Perforatus perforatus", "Lima lima", "Cystodytes dellechiajei", "Didemnum cf. coriaceum", 
+Species_order <- c("non-alive", "Turf", "Lima lima", "Perforatus perforatus", "Cystodytes dellechiajei", "Didemnum cf. coriaceum", 
                    "Didemnum maculosum", "Didemnum sp.", "Clathrina clathrus", "Patinella radiata", "Schizobrachiella sanguinea",
                    "Schizoporella dunkeri", "Botryllus sp.", "Phorbas topsenti", "Pseudolithoderma adriaticum", 
                    "Hildenbrandia crouaniorum", "Peyssonnelia squamaria", "Serpulids", "CCA", "Terpios fugax", "Bugula neritina", 
@@ -297,7 +297,9 @@ Transplants_AMB_2 <- Tile_cover_AMB %>%
         strip.background = element_rect(colour = "black", fill = "cornflowerblue"),
         plot.margin = unit(c(.5, .5, .5, .5), "cm"))
 
-Legend_Dark <- data_col %>% mutate(Species_lab = str_replace(Species_order, "\\s(?!sp)", "\n")) %>% 
+data_col <- data_col %>% mutate(Species_lab = str_replace(Species_order, "\\s(?!sp.)", "\n"))
+data_col$Species_lab[data_col$Species == "Diplosoma spongiforme"] = "Diplosoma\nspongiforme"
+Legend_Dark <- data_col %>% 
   ggplot(aes(x = x_order, y = y_order, fill = Species, label = Species_lab)) + 
   geom_label(show.legend = F, hjust = 0, 
              color = c(rep("black", 11), rep("white", 5), rep("black", 7), rep("white", 5), rep("black", 8))) +
@@ -320,4 +322,4 @@ Cover_tot <- Transplants_AMB + Transplants_AMB_2 + plot_spacer() + plot_spacer()
   Transplants_ELOW + Transplants_ELOW_2 + plot_spacer() + plot_spacer() +
   Legend_Light + Legend_Dark + plot_layout(heights = c(30, -7.5, 30, -7.5, 30, -1, 30), ncol = 2)
 
-ggsave(Cover_tot, file = "../Outputs/Figures/Cover/Cover_Transplants.jpg", width = 40, height = 20, units = "cm", dpi = 300)
+ggsave(Cover_tot, file = "Outputs/Figures/Cover/Cover_Transplants.jpg", width = 70, height = 35, units = "cm", dpi = 300)
