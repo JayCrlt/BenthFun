@@ -12,6 +12,9 @@ corrected_names <- read_excel("Data/7. Covers/corrected_names.xlsx")
 datasets <- lapply(sheet_names, function(sheet) {
   read_excel("Data/7. Covers/20230725_tiles_species_visual_census_25subquadrats.xlsx", sheet = sheet)})
 
+# Define the taxonomic group
+table(corrected_names$taxonomy)
+
 # Total cover for each tile Light
 Tile_cover_T0 = vector("list", 18) ; Tile_cover_T1 = vector("list", 18) 
 Tile_cover_T2 = vector("list", 18) ; Tile_cover_T3 = vector("list", 18) ; Tile_cover = vector("list", 18)
