@@ -327,4 +327,4 @@ Biomass_data <- Cover_biomass %>% rename(Biomass_overall = Biomass, Biomass_std_
   select(Tile, pH, Time, nb_days, Biomass_overall, Biomass_cal, Biomass_npp, Biomass_fil, 
          Biomass_std_overall, Biomass_std_cal, Biomass_std_npp, Biomass_std_fil) %>% data.frame()
 
-xlsx::write.xlsx(Biomass_data, file = "Outputs/Tables/Biomass/Biomass_Transplants_data.xlsx", row.names = F)
+xlsx::write.xlsx(Biomass_data, file = "Outputs/Summary/Biomass_Transplants_data.xlsx", row.names = F)

@@ -1,7 +1,15 @@
 options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
 
-### Diving_Log
-Nutrients <- read_excel("Data/6. Nutrients/Nutrients.xlsx", sheet = "Sheet1") %>% select(-c(`DATA ANALYSIS`, Package))
+### Data
+Nutrients  <- read_excel("Data/6. Nutrients/Nutrients.xlsx", sheet = "Sheet1") %>% select(-c(`DATA ANALYSIS`, Package))
+Biomass    <- read_excel("Outputs/Tables/Biomass/Biomass_Transplants_data.xlsx", sheet = "Sheet1") 
+Diving_log <- read_excel("Data/1. Diving log/Diving_log_BenthFun.xlsx", 
+                         col_types = c("date", "text", "text", "date", "date", 
+                                       "date", "text", "text", "numeric", "numeric"),
+                         sheet = "Corrected") %>% 
+  mutate(., Start_incubation = format(as.POSIXct(Start_incubation), format = "%H:%M:%S"), 
+         Stop_Incubation = format(as.POSIXct(Stop_Incubation), format = "%H:%M:%S"), 
+         Stop_Alkalinity = format(as.POSIXct(Stop_Alkalinity), format = "%H:%M:%S"))
 
 # Raw data
 NH3 <- Nutrients %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% dplyr::filter(Experiment != "PI Curves") %>% 
@@ -70,3 +78,24 @@ SiO4 <- Transplants_nut %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AM
   theme_classic() +
   scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
 NH3 + PO4 + NO2 + NO3 + SiO4 + plot_layout(guides = "collect", ncol = 5) & theme(legend.position = "bottom")
+
+# Build Nutrients dataset
+Nutrients_database = Diving_log %>% dplyr::select(Label, `Tile_N°`) %>% 
+  drop_na() %>% left_join(Transplants_nut %>% rename(Label = Sample)) %>% 
+  dplyr::select(`Tile_N°`, pH, Phase, `NH3 (mmol m-3)`, `PO4 (mmol m-3)`, `NO2 (mmol m-3)`, `NO3 (mmol m-3)`, `SiO4 (mmol m-3)`) %>% 
+  rename(Time = Phase, Tile = `Tile_N°`) %>% mutate(Tile = paste("tile_", str_pad(Tile, width = 2, pad = "0"), sep = "")) %>% 
+  drop_na()
+
+Nutrients_database = data.frame(Tile = rep(Nutrients_database$Tile, 5),
+                                pH   = rep(Nutrients_database$pH,   5),
+                                Time = rep(Nutrients_database$Time, 5),
+                                Nutrients_var = c(rep("NH3", length(Nutrients_database$`NH3 (mmol m-3)`)),
+                                                  rep("PO4", length(Nutrients_database$`PO4 (mmol m-3)`)),
+                                                  rep("NO2", length(Nutrients_database$`NO2 (mmol m-3)`)),
+                                                  rep("NO3", length(Nutrients_database$`NO3 (mmol m-3)`)),
+                                                  rep("SiO4", length(Nutrients_database$`SiO4 (mmol m-3)`))),
+                                Nutrients_val = c(Nutrients_database$`NH3 (mmol m-3)`, Nutrients_database$`PO4 (mmol m-3)`,
+                                                  Nutrients_database$`NO2 (mmol m-3)`, Nutrients_database$`NO3 (mmol m-3)`,
+                                                  Nutrients_database$`SiO4 (mmol m-3)`))
+
+xlsx::write.xlsx(Nutrients_database, file = "Outputs/Summary/Nutrients_Transplants_data.xlsx", row.names = F)
