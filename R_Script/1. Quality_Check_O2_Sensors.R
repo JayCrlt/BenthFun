@@ -57,8 +57,7 @@ for (date in dates) {
                               condition <- "Tn1 – AMB" } else if (date  == "2023-09-19") { 
                                 condition <- "Tn2 – ELOW" } else if (date == "2023-09-18") { 
                                   condition <- "Tn2 – LOW" } else if (date  == "2023-09-15") {
-                                    condition <- "Tn2 – AMB" } else {
-                                      condition <- NA }
+                                    condition <- "Tn2 – AMB" } else { condition <- NA }
 
 #####################
 
