@@ -6,6 +6,7 @@ rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(p
 Biomass   <- read_excel("Outputs/Summary/Biomass_Transplants_data.xlsx")
 Functions <- read_excel("Outputs/Summary/Summary_Process_BenthFun.xlsx") %>% dplyr::filter(Main_Exp == "Transplants")
 Nutrients <- read_excel("Outputs/Summary/Nutrients_Transplants_data.xlsx")
+PAR_tiles <- read_excel("Outputs/Summary/PAR_Transplants.xlsx") 
 
 ## Compile to a single dataframe()
 # First Functions and Nutrients
@@ -33,25 +34,79 @@ dataset_change_tot <- dataset_change %>% dplyr::filter(Process %notin% c("calcif
                                          Biomass_std_overall, Biomass_std_cal, Biomass_std_npp, Biomass_std_fil)),
             by = c("Tile", "pH", "Time")) %>% mutate(output_std = output / Biomass_overall) %>% select(-Biomass_overall)
 
+##### PAR CORRECTION ----
 ### Need to correct by the PAR!
+ELO_PAR        <- 3.13*(1-1.61*exp(-0.07*seq(0,600,1)))
+scaled_ELO_PAR <- data.frame(PAR_intensity = seq(0,600,1), correction = 
+  ((ELO_PAR - min(ELO_PAR)) / (max(ELO_PAR) - min(ELO_PAR))) * 100)
+LOW_PAR        <- 6.94*(1-1.32*exp(-0.07*seq(0,600,1)))
+scaled_LOW_PAR <- data.frame(PAR_intensity = seq(0,600,1), correction = 
+  ((LOW_PAR - min(LOW_PAR)) / (max(LOW_PAR) - min(LOW_PAR))) * 100)
+AMB_PAR        <- 5.13*(1-1.51*exp(-0.08*seq(0,600,1)))
+scaled_AMB_PAR <- data.frame(PAR_intensity = seq(0,600,1), correction = 
+  ((AMB_PAR - min(AMB_PAR)) / (max(AMB_PAR) - min(AMB_PAR))) * 100)
 
-
-
-
-# Compile the dataset
+## Compile the dataset
 dataset_change      <- rbind(dataset_change_cal, dataset_change_npp, dataset_change_tot) %>% arrange(Tile) %>% 
-  select(Tile, pH, Time, nb_days, Process, output, output_std)
+  select(Tile, pH, Time, nb_days, Process, output, output_std) %>% left_join(PAR_tiles, by = c("Tile", "pH", "Time"))
+# ELO correction by PAR
+dataset_change_ELO_corrected <- dataset_change %>% 
+  dplyr::filter(pH == "ELOW", Process %in% c("calcifcation rate", "gross photosynthesis rate",
+                                             "net photosynthesis rate", "dark respiration rate")) %>% 
+  mutate(PAR_intensity = round(PAR_intensity, 0)) %>% 
+  left_join(scaled_ELO_PAR) %>% mutate(output = (output / correction) * 100) %>% select(-correction)
+dataset_change_ELO <- rbind(dataset_change_ELO_corrected, dataset_change %>% 
+                              dplyr::filter(pH == "ELOW", Process %notin% 
+                                            c("calcifcation rate", "gross photosynthesis rate",
+                                              "net photosynthesis rate", "dark respiration rate")))
+# LOW correction by PAR
+dataset_change_LOW_corrected <- dataset_change %>% 
+  dplyr::filter(pH == "LOW", Process %in% c("calcifcation rate", "gross photosynthesis rate",
+                                            "net photosynthesis rate", "dark respiration rate")) %>% 
+  mutate(PAR_intensity = round(PAR_intensity, 0)) %>% 
+  left_join(scaled_LOW_PAR) %>% mutate(output = (output / correction) * 100) %>% select(-correction)
+dataset_change_LOW <- rbind(dataset_change_LOW_corrected, dataset_change %>% 
+                              dplyr::filter(pH == "LOW", Process %notin% 
+                                              c("calcifcation rate", "gross photosynthesis rate",
+                                                "net photosynthesis rate", "dark respiration rate")))
+# AMB correction by PAR
+dataset_change_AMB_corrected <- dataset_change %>% 
+  dplyr::filter(pH == "AMB", Process %in% c("calcifcation rate", "gross photosynthesis rate",
+                                            "net photosynthesis rate", "dark respiration rate")) %>% 
+  mutate(PAR_intensity = round(PAR_intensity, 0)) %>% 
+  left_join(scaled_AMB_PAR) %>% mutate(output = (output / correction) * 100) %>% select(-correction)
+dataset_change_AMB <- rbind(dataset_change_AMB_corrected, dataset_change %>% 
+                              dplyr::filter(pH == "AMB", Process %notin% 
+                                              c("calcifcation rate", "gross photosynthesis rate",
+                                                "net photosynthesis rate", "dark respiration rate")))
+
+# Dataset change
+dataset_change  <- rbind(dataset_change_ELO, dataset_change_LOW, dataset_change_AMB)
+
+##### Calcification from ELOW ----
+# No calcifying organisms but small negligible calcification detected (avg < 5 units of Ak)
+dataset_change$output[dataset_change$Process == "calcifcation rate" & 
+                        dataset_change$Time == "T3" & dataset_change$pH == "ELOW"] = 0
+dataset_change$output_std[dataset_change$Process == "calcifcation rate" & 
+                            dataset_change$Time == "T3" & dataset_change$pH == "ELOW"] = 0
+
+##### RATIO WITH T0 ----
 dataset_change_init <- dataset_change %>% dplyr::filter(Time == "T0") %>% 
-  rename(output_init = output, output_std_init = output_std, Time_init = Time) %>% select(-c(nb_days, Time_init))
+  rename(output_init = output, output_std_init = output_std, Time_init = Time) %>% 
+  select(-c(nb_days, Time_init, PAR_intensity))
 dataset_change      <- dataset_change %>% left_join(dataset_change_init, by = c("Tile", "pH", "Process")) %>% 
   mutate(change_std = output_std / output_std_init) 
-
-# No calcifying organisms but small calcification detected
 dataset_change$change_std[dataset_change$change_std == Inf] = 0
 
 dataset_change_tot = dataset_change %>% group_by(pH, Process, Time, nb_days) %>% 
   summarise(change_std_avg = mean(change_std), change_std_sd = sd(change_std))
 
-unique(dataset_change_tot$Process)
-dataset_change_tot %>% dplyr::filter(change_std_sd <= change_std_avg, Process == "net photosynthesis rate") %>% 
-  ggplot(aes(x = nb_days, y = change_std_avg, shape = pH, color = Process)) + geom_point() + facet_wrap(~Process)
+dataset_change = dataset_change %>% dplyr::filter(change_std <= 200, change_std >= -200) %>% 
+  mutate(pH = fct_relevel(pH, c("ELOW", "LOW", "AMB")))
+dataset_change$change_std[dataset_change$change_std > 10] = 10
+dataset_change$change_std[dataset_change$change_std < -10] = -10
+dataset_change %>%  
+  ggplot(aes(x = nb_days, y = change_std, fill = Process, group = nb_days)) + 
+  geom_boxplot(outliers = FALSE) + 
+  geom_jitter(color = "black", shape = 21, alpha = .7) +
+  facet_grid(pH~Process)

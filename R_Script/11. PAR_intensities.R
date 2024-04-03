@@ -142,4 +142,12 @@ extracted_PAR_T1$Time = "T1"
 
 # Define final dataset for transplants
 PAR_Transplants = rbind(extracted_PAR, extracted_PAR_T1) %>% data_frame() %>% arrange(Time) %>% data.frame()
-xlsx::write.xlsx(PAR_Transplants, file = "Outputs/Summary/PAR_Transplants.xlsx", row.names = F)
+# xlsx::write.xlsx(PAR_Transplants, file = "Outputs/Summary/PAR_Transplants.xlsx", row.names = F)
+
+read_excel("Outputs/Summary/PAR_Transplants.xlsx") %>% 
+  mutate(pH = fct_relevel(pH, c("ELOW", "LOW", "AMB"))) %>% 
+  ggplot(aes(x = PAR_intensity, y = Tile, shape = Time, fill = pH)) + 
+  geom_point(size = 2, color = "black") +
+  scale_shape_manual(values = c(21,22,23,24)) +
+  scale_fill_manual(values = c("red", "gold", "cornflowerblue")) + theme_dark() +
+  theme(legend.position = "bottom")

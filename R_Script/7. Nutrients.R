@@ -2,7 +2,7 @@ options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; librar
 
 ### Data
 Nutrients  <- read_excel("Data/6. Nutrients/Nutrients.xlsx", sheet = "Sheet1") %>% select(-c(`DATA ANALYSIS`, Package))
-Biomass    <- read_excel("Outputs/Tables/Biomass/Biomass_Transplants_data.xlsx", sheet = "Sheet1") 
+Biomass    <- read_excel("Outputs/Summary/Biomass_Transplants_data.xlsx", sheet = "Sheet1") 
 Diving_log <- read_excel("Data/1. Diving log/Diving_log_BenthFun.xlsx", 
                          col_types = c("date", "text", "text", "date", "date", 
                                        "date", "text", "text", "numeric", "numeric"),

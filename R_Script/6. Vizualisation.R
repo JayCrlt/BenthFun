@@ -129,6 +129,17 @@ data_transplants <- data_transplants %>% select(-init_pH)
 data_historical  <- Summary[[1]]
 Summary <- rbind(data_transplants, data_historical)
 
+# Change tile name
+convert_tile <- function(tile) {
+  tile_number <- str_extract(tile, "\\d+")
+  tile_number <- str_pad(tile_number, width = 2, side = "left", pad = "0")
+  new_tile <- paste0("tile_", tile_number)
+  return(new_tile)}
+Summary <- Summary %>% mutate(Tile = convert_tile(Tile)) %>% 
+  mutate(pH_cond = recode(pH_cond, "extreme low pH conditions" = "ELOW",
+                                   "low pH conditions" = "LOW",
+                                   "ambient pH conditions" = "AMB"))
+
 # Exporting important informations
 xlsx::write.xlsx(Summary %>% as.data.frame(), "Outputs/Summary/Summary_Process_BenthFun.xlsx", row.names = FALSE)
 ggsave(Process_Transplants, filename = "Process_Transplants_Total.png", path = "Outputs/Figures/Processes_Panels", device = "png", width = 12, height = 10) 
