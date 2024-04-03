@@ -8,6 +8,12 @@ Functions <- read_excel("Outputs/Summary/Summary_Process_BenthFun.xlsx") %>% dpl
 Nutrients <- read_excel("Outputs/Summary/Nutrients_Transplants_data.xlsx")
 PAR_tiles <- read_excel("Outputs/Summary/PAR_Transplants.xlsx") 
 
+# Colors
+values_grandient_color = c("#402d21", "#553c2c", "#704f3a", "#805b43", "#90664b", "#a07154",
+                           "#af8266", "#ba947b", "#cbae9b", "#d3bbab", "#e4d5cc", "#efe7e1", "#ffffff",
+                           "#dcecd4", "#cee5c3", "#bbdbac", "#a4cf8f", "#9fcc8a", "#88c06d", "#7ab85c",
+                           "#6cb04c", "#629f44", "#578e3d", "#497733", "#3f662c", "#314f22")
+
 ## Compile to a single dataframe()
 # First Functions and Nutrients
 dataset_change <- data.frame(Tile    = c(Functions$Tile, Nutrients$Tile),
@@ -101,12 +107,27 @@ dataset_change$change_std[dataset_change$change_std == Inf] = 0
 dataset_change_tot = dataset_change %>% group_by(pH, Process, Time, nb_days) %>% 
   summarise(change_std_avg = mean(change_std), change_std_sd = sd(change_std))
 
-dataset_change = dataset_change %>% dplyr::filter(change_std <= 200, change_std >= -200) %>% 
-  mutate(pH = fct_relevel(pH, c("ELOW", "LOW", "AMB")))
-dataset_change$change_std[dataset_change$change_std > 10] = 10
-dataset_change$change_std[dataset_change$change_std < -10] = -10
-dataset_change %>%  
+dataset_change = dataset_change %>% mutate(pH = fct_relevel(pH, c("ELOW", "LOW", "AMB")))
+dataset_change_viz = dataset_change
+dataset_change_viz$change_std[dataset_change_viz$change_std > 10] = 10
+dataset_change_viz$change_std[dataset_change_viz$change_std < -10] = -10
+dataset_change_viz %>%  
   ggplot(aes(x = nb_days, y = change_std, fill = Process, group = nb_days)) + 
   geom_boxplot(outliers = FALSE) + 
   geom_jitter(color = "black", shape = 21, alpha = .7) +
   facet_grid(pH~Process)
+
+##### Work with ranges
+dataset_change = dataset_change %>% mutate(range = cut(change_std, breaks = c(-1000, -200, -100, seq(-10, 10, 1), 100, 200, 1000), 
+                                                       include.lowest = T)) %>% arrange(range)
+chosen_range   = data.frame(range           = unique(dataset_change$range),
+                            arbitrary_value = seq(1, length(unique(dataset_change$range)), 1),
+                            color           = values_grandient_color)
+dataset_change = dataset_change %>% left_join(chosen_range) %>% arrange(Tile, Time)
+
+dataset_change %>% dplyr::filter(Tile == "tile_18", Time == "T3") %>% 
+  select(Tile, pH, Time, Process, change_std, range, arbitrary_value, color) %>% 
+  ggplot() + geom_bar(aes(y = arbitrary_value, x = Process), stat = "identity", color = "black") +
+  geom_hline(yintercept = 14, linetype = "dashed", color = "red") + 
+  scale_fill_manual(aes(values = color)) +
+  coord_polar(start = 0)
