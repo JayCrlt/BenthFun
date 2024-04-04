@@ -10,9 +10,29 @@ PAR_tiles <- read_excel("Outputs/Summary/PAR_Transplants.xlsx")
 
 # Colors
 values_grandient_color = c("#402d21", "#553c2c", "#704f3a", "#805b43", "#90664b", "#a07154",
-                           "#af8266", "#ba947b", "#cbae9b", "#d3bbab", "#e4d5cc", "#efe7e1", "#ffffff",
-                           "#dcecd4", "#cee5c3", "#bbdbac", "#a4cf8f", "#9fcc8a", "#88c06d", "#7ab85c",
+                           "#af8266", "#ba947b", "#c2a18b", "#cbae9b", "#d3bbab", "#e4d5cc", "#efe7e1", 
+                           "#ffffff", "#cee5c3", "#bbdbac", "#a4cf8f", "#9fcc8a", "#88c06d", "#7ab85c",
                            "#6cb04c", "#629f44", "#578e3d", "#497733", "#3f662c", "#314f22")
+
+# Usefull functions
+element_textbox_highlight <- function(..., hi.labels = NULL, hi.fill = NULL,
+                                      hi.col = NULL, hi.box.col = NULL, hi.family = NULL) {
+  structure(
+    c(element_textbox(...),
+      list(hi.labels = hi.labels, hi.fill = hi.fill, hi.col = hi.col, hi.box.col = hi.box.col, hi.family = hi.family)
+    ),
+    class = c("element_textbox_highlight", "element_textbox", "element_text", "element")
+  )
+}
+element_grob.element_textbox_highlight <- function(element, label = "", ...) {
+  if (label %in% element$hi.labels) {
+    element$fill <- element$hi.fill %||% element$fill
+    element$colour <- element$hi.col %||% element$colour
+    element$box.colour <- element$hi.box.col %||% element$box.colour
+    element$family <- element$hi.family %||% element$family
+  }
+  NextMethod()
+}
 
 ## Compile to a single dataframe()
 # First Functions and Nutrients
@@ -125,9 +145,95 @@ chosen_range   = data.frame(range           = unique(dataset_change$range),
                             color           = values_grandient_color)
 dataset_change = dataset_change %>% left_join(chosen_range) %>% arrange(Tile, Time)
 
-dataset_change %>% dplyr::filter(Tile == "tile_18", Time == "T3") %>% 
-  select(Tile, pH, Time, Process, change_std, range, arbitrary_value, color) %>% 
-  ggplot() + geom_bar(aes(y = arbitrary_value, x = Process), stat = "identity", color = "black") +
-  geom_hline(yintercept = 14, linetype = "dashed", color = "red") + 
-  scale_fill_manual(aes(values = color)) +
-  coord_polar(start = 0)
+##### Viz ----
+## init the vectors
+dataset_loop <- dataset_change %>% distinct(Tile, pH) ; Time_loop <- unique(dataset_change$Time)
+## init the outputs
+Data_Flower_functions <- vector("list", length = 18)
+for (i in seq_along(Data_Flower_functions)) {
+  Data_Flower_functions[[i]] <- vector("list", length = 4)
+  for (j in seq_along(Data_Flower_functions[[i]])) {
+    Data_Flower_functions[[i]][[j]] <- list() }}
+Plot_Flower_functions <- Data_Flower_functions
+
+## Start the loop
+for (i in 1:length(dataset_loop$Tile)) {
+  for (j in 1:length(Time_loop)) {
+# Build a dataset
+Data_Flower_functions[[i]][[j]] <- dataset_change %>% dplyr::filter(Tile == dataset_loop$Tile[i], Time == Time_loop[j]) %>% 
+      select(Tile, pH, Time, Process, change_std, range, arbitrary_value, color) %>% 
+      mutate(arbitrary_value = ifelse(change_std == 0, NA, arbitrary_value)) %>% 
+      mutate(Process = ifelse(Process == "calcifcation rate", "CR", Process),
+             Process = ifelse(Process == "gross photosynthesis rate", "GPP", Process),
+             Process = ifelse(Process == "net photosynthesis rate", "NPP", Process),
+             Process = ifelse(Process == "dark respiration rate", "DR", Process)) %>% 
+  dplyr::filter(Process %notin% c("NPP", "NO2"))
+
+# Create a plot according if it's T0 or not
+if (any(Data_Flower_functions[[i]][[j]]$Time == "T0")) {
+  Plot_Flower_functions[[i]][[j]] <- Data_Flower_functions[[i]][[j]] %>% 
+    ggplot() + geom_bar(aes(y = arbitrary_value, x = Process, fill = color), stat = "identity", color = "black") +
+    scale_y_continuous(limits = c(0, 26), name = "ratio of change", 
+                       breaks = c(0, 3, 8, 14, 18, 23, 26),
+                       labels = c(-1000, -10, -5, 1, 5, 10, 1000)) +
+    geom_hline(yintercept = 14, linetype = "dashed", color = "black") + 
+    scale_fill_identity() + scale_x_discrete(name ="") +
+    coord_polar(start = 0) + theme_light() +
+    theme(axis.text = element_text(size = 14),
+          axis.title = element_text(size = 16),
+          strip.text = element_text(size = 16),
+          strip.background = element_rect(fill = case_when(
+            Data_Flower_functions[[i]][[j]]$pH == "ELOW" ~ "firebrick1",
+            Data_Flower_functions[[i]][[j]]$pH == "LOW" ~  "gold",
+            Data_Flower_functions[[i]][[j]]$pH == "AMB" ~  "cornflowerblue"), color = "black")) +
+    facet_wrap(~Time)
+} else {
+  Plot_Flower_functions[[i]][[j]] <- Data_Flower_functions[[i]][[j]] %>% 
+    ggplot() + geom_bar(aes(y = arbitrary_value, x = Process, fill = color), stat = "identity", color = "black") +
+    scale_y_continuous(limits = c(0, 26), name = "", 
+                       breaks = c(0, 3, 8, 14, 18, 23, 26),
+                       labels = c("", "","", "", "", "", "")) +
+    geom_hline(yintercept = 14, linetype = "dashed", color = "black") + 
+    scale_fill_identity() + scale_x_discrete(name ="") +
+    coord_polar(start = 0) + theme_light() +
+    theme(axis.text = element_text(size = 14),
+          axis.title = element_text(size = 16),
+          strip.text = element_text(size = 16),
+          axis.ticks = element_blank(),
+          strip.background = element_rect(fill = case_when(
+            Data_Flower_functions[[i]][[j]]$pH == "ELOW" ~ "firebrick1",
+            Data_Flower_functions[[i]][[j]]$pH == "LOW" ~  "gold",
+            Data_Flower_functions[[i]][[j]]$pH == "AMB" ~  "cornflowerblue"), color = "black")) +
+    facet_wrap(~Time)
+  }
+ }
+}
+
+dataset_loop = dataset_loop %>% mutate(Tile = sprintf("Tile %02d", as.numeric(gsub("tile_", "", Tile))))
+
+## Compile each flower plot
+Tile_panel_plot = vector("list", 18)
+for (i in 1:18) {
+  Tile_panel_plot[[i]] <- Plot_Flower_functions[[i]][[2]] + plot_spacer() + 
+    Plot_Flower_functions[[i]][[3]] + plot_spacer() + Plot_Flower_functions[[i]][[4]] + 
+    plot_layout(nrow =  1, heights = 5, widths = c(5, -1, 5, -1, 5)) +
+    plot_annotation(title = dataset_loop$Tile[i]) &
+    theme(title = element_text(size = 18, face = 'bold'),
+          axis.title = element_text(size = 16, face = "plain"))
+}
+
+ELO_Functions_Panel <- cowplot::plot_grid(Tile_panel_plot[[2]], Tile_panel_plot[[5]], Tile_panel_plot[[6]], 
+                   Tile_panel_plot[[9]], Tile_panel_plot[[13]], Tile_panel_plot[[15]], ncol = 1)
+LOW_Functions_Panel <- cowplot::plot_grid(Tile_panel_plot[[1]], Tile_panel_plot[[3]], Tile_panel_plot[[10]], 
+                   Tile_panel_plot[[11]], Tile_panel_plot[[16]], Tile_panel_plot[[18]], ncol = 1)
+AMB_Functions_Panel <- cowplot::plot_grid(Tile_panel_plot[[4]], Tile_panel_plot[[7]], Tile_panel_plot[[8]], 
+                   Tile_panel_plot[[12]], Tile_panel_plot[[14]], Tile_panel_plot[[17]], ncol = 1)
+
+#### Export ----
+ggsave(ELO_Functions_Panel, file = "Outputs/Figures/Processes_Panels/ELO_Functions_Panel.png", width = 40, 
+       height = 70, units = "cm", dpi = 300)
+ggsave(LOW_Functions_Panel, file = "Outputs/Figures/Processes_Panels/LOW_Functions_Panel.png", width = 40, 
+       height = 70, units = "cm", dpi = 300)
+ggsave(AMB_Functions_Panel, file = "Outputs/Figures/Processes_Panels/AMB_Functions_Panel.png", width = 40, 
+       height = 70, units = "cm", dpi = 300)
+
