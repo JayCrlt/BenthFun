@@ -1,4 +1,3 @@
-rm(list = ls())
 options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
 `%notin%` = Negate(`%in%`)
 
@@ -247,8 +246,8 @@ for (i in 1:18) {
                                 Time    = c(rep("T0", length(Tile_cover[[i]]$Species)), rep("T1", length(Tile_cover[[i]]$Species)), 
                                             rep("T2", length(Tile_cover[[i]]$Species)), rep("T3", length(Tile_cover[[i]]$Species))),
                                 Cover   = c(Tile_cover[[i]]$T0, Tile_cover[[i]]$T1, Tile_cover[[i]]$T2, Tile_cover[[i]]$T3)) }
-Tile_cover = bind_rows(Tile_cover) %>% left_join(Zone_pH) %>% left_join(corrected_names) %>% select(-Species) %>% rename(Species = species_new)
-Tile_cover <- Tile_cover %>% left_join(Zone_pH) 
+Tile_cover = bind_rows(Tile_cover) %>% left_join(Zone_pH) %>% left_join(corrected_names) %>% 
+  select(-Species) %>% rename(Species = species_new) %>% left_join(Zone_pH) 
 
 # Total number of species within a functional group
 Tile_cover <- Tile_cover %>% left_join(data_col)
