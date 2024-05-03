@@ -12,6 +12,7 @@ datasets <- lapply(sheet_names, function(sheet) {
 # Load the biomass
 Biomass  <- read_excel("Data/4. Visual census/Species Biomass Weight/Relationship biomass – cover.xlsx")
 Scraping <- read_excel("Data/4. Visual census/Species Biomass Weight/Biomass_Species.xlsx")
+Zone_pH  <- data_frame(Tile = sheet_names, pH = c(rep("ELOW", 6), rep("LOW", 6), rep("AMB", 6)))
 
 # Total cover (/70)
 Tile_cover_T0 = vector("list", 18) ; Tile_cover_T1 = vector("list", 18) 
@@ -35,7 +36,10 @@ for (i in 1:18) {
 Tile_cover = bind_rows(Tile_cover)
 Tile_cover <- Tile_cover %>% left_join(corrected_names) %>% select(-c(Species, ...1, functional.group)) %>% 
   rename(Species = species_new) %>% filter(!grepl("dead", Species)) %>% 
-  filter(Species != "tile")
+  filter(Species != "tile") %>% left_join(Zone_pH)
+Tile_cover_AMB  <- Tile_cover %>% dplyr::filter(pH == "AMB")
+Tile_cover_LOW  <- Tile_cover %>% dplyr::filter(pH == "LOW")
+Tile_cover_ELOW <- Tile_cover %>% dplyr::filter(pH == "ELOW")
 
 # Biomass
 ## Clean Biomass File #1
