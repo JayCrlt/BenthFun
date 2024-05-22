@@ -271,9 +271,251 @@ data_model = data_model %>% mutate(ribbon_neg = Estimate - Est.Error,
                                    ribbon_pos = Estimate + Est.Error)
 
 data_model %>% # dplyr::filter(Communities == "Mixed") %>% 
+  dplyr::filter(Function %notin% c("NO3", "SiO4")) %>% 
   ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
   #geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos)) +
   geom_point(aes(shape = Communities), size = 1) + 
   facet_grid(Communities~Function) + 
   scale_x_continuous(name = "number of days", limits = c(0,100)) +
-  scale_y_continuous(name = "factor_of_change", limits = c(-50,50)) 
+  scale_y_continuous(name = "factor_of_change", limits = c(-5,5)) 
+
+##### Split it according to brandl et al. 2018 #####
+### 1) Calcification rates
+CR_Process <- data_model %>% dplyr::filter(Function %in% c("CR")) %>% 
+  mutate(ribbon_neg = Estimate - Est.Error,
+         ribbon_pos = ribbon_neg + 1.7*Est.Error)
+
+# Crop ribbon polygon
+CR_Process$ribbon_neg[CR_Process$ribbon_neg <= -5] = -5
+CR_Process$ribbon_pos[CR_Process$ribbon_pos <= -5] = -5
+CR_Process$ribbon_neg[CR_Process$ribbon_neg >= 5] = 5
+CR_Process$ribbon_pos[CR_Process$ribbon_pos >= 5] = 5
+min_day = CR_Process %>% dplyr::filter(nb_days <= 50 | pH != "ELOW", ribbon_pos <=-5) %>%
+  group_by(Communities) %>% summarise(min = min(nb_days)) %>% summarise(min = max(min))
+
+# Figure Panel 1
+(Panel_1_CR <- CR_Process %>% 
+  mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
+  dplyr::filter(nb_days <= min_day$min | pH != "ELOW") %>% 
+  ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
+  geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
+  geom_point(size = 1) + 
+  facet_grid(Communities~Function) + 
+  scale_x_continuous(name = "Number of days", limits = c(0,100)) +
+  geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+  scale_y_continuous(name = "Factor of change", limits = c(-5,5)) +
+  scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+  scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+  theme_classic() + ggtitle("1. Calcification Rate") +
+  theme(axis.text        = element_text(size = 14),
+        axis.title       = element_text(size = 16),
+        legend.text      = element_text(size = 14),
+        legend.title     = element_blank(),
+        panel.border     = element_rect(color = "black", fill = NA, size = 1),
+        strip.text       = element_blank(), 
+        strip.background = element_blank(),
+        legend.position  = "bottom"))
+
+### 2) Respiration rates
+DR_Process <- data_model %>% dplyr::filter(Function %in% c("DR")) 
+
+# Over-fitting for the figure – Only! i.e., not used for interpretations
+DR_model2  <- brm(Estimate ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) + 0, init = "0",
+                 data = DR_Process, family = weibull(), cores = 3, chains = 3, iter = 5000,
+                 warmup = 1000, control = list(adapt_delta = 0.9, max_treedepth = 5))
+
+bayes_R2(DR_model2) # R2 = 63% vs. 43% previously
+training_data_DR = cbind(training_data, predict(DR_model2, training_data))
+
+DR_Process = training_data_DR %>% mutate(Function = rep("DR", 23409),
+                                         ribbon_neg = Estimate - Est.Error,
+                                         ribbon_pos = Estimate + Est.Error)
+# Crop ribbon polygon
+DR_Process$ribbon_neg[DR_Process$ribbon_neg <= -5] = -5
+DR_Process$ribbon_pos[DR_Process$ribbon_pos <= -5] = -5
+DR_Process$ribbon_neg[DR_Process$ribbon_neg >= 5] = 5
+DR_Process$ribbon_pos[DR_Process$ribbon_pos >= 5] = 5
+
+# Figure Panel 2A
+(Panel_2_DR <- DR_Process %>% dplyr::filter(ribbon_neg < 5) %>% 
+    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
+    ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
+    geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
+    geom_point(size = 1) + 
+    facet_grid(Communities~Function) + 
+    scale_x_continuous(name = "Number of days", limits = c(0,100)) +
+    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    scale_y_continuous(name = "Factor of change", limits = c(-5,5)) +
+    scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    theme_classic() + ggtitle("2. Respiration Rate") +
+    theme(axis.text        = element_text(size = 14),
+          axis.title       = element_text(size = 16),
+          legend.text      = element_text(size = 14),
+          legend.title     = element_blank(),
+          panel.border     = element_rect(color = "black", fill = NA, size = 1),
+          strip.text       = element_blank(), 
+          strip.background = element_blank(),
+          legend.position  = "bottom"))
+
+### 3) Gross Primary Production
+GPP_Process <- data_model %>% dplyr::filter(Function %in% c("GPP")) %>% 
+  mutate(ribbon_neg = Estimate - Est.Error,
+         ribbon_pos = ribbon_neg + 2*Est.Error)
+
+# Crop ribbon polygon
+GPP_Process$ribbon_neg[GPP_Process$ribbon_neg <= -5] = -5
+GPP_Process$ribbon_pos[GPP_Process$ribbon_pos <= -5] = -5
+GPP_Process$ribbon_neg[GPP_Process$ribbon_neg >= 5] = 5
+GPP_Process$ribbon_pos[GPP_Process$ribbon_pos >= 5] = 5
+
+# Figure Panel 2B
+(Panel_2_GPP <- GPP_Process %>% dplyr::filter(ribbon_neg < 5) %>% 
+    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
+    ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
+    geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
+    geom_point(size = 1) + 
+    facet_grid(Communities~Function) + 
+    scale_x_continuous(name = "Number of days", limits = c(0,100)) +
+    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    scale_y_continuous(name = "", limits = c(-5,5)) +
+    scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    theme_classic() + ggtitle("3. Gross Primary Production") +
+    theme(axis.text        = element_text(size = 14),
+          axis.title       = element_text(size = 16),
+          legend.text      = element_text(size = 14),
+          legend.title     = element_blank(),
+          panel.border     = element_rect(color = "black", fill = NA, size = 1),
+          strip.text       = element_blank(), 
+          strip.background = element_blank(),
+          legend.position  = "bottom"))
+
+### 4) NH4 Uptakes
+NH4_Process <- data_model %>% dplyr::filter(Function %in% c("NH3"))
+
+# Over-fitting for the figure – Only! i.e., not used for interpretations
+NH4_model2  <- brm(abs(Estimate) ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) + 0, init = "0",
+                  data = NH4_Process, family = weibull(), cores = 3, chains = 3, iter = 5000,
+                  warmup = 1000, control = list(adapt_delta = 0.9, max_treedepth = 5))
+
+bayes_R2(NH4_model2) # R2 = 79% vs. 48% previously
+training_data_NH4 = cbind(training_data, predict(NH4_model2, training_data))
+
+NH4_Process = training_data_NH4 %>% mutate(Function = rep("NH4", 23409),
+                                           Estimate = -ifelse(pH %notin% c("ELOW", "LOW"), -abs(Estimate), Estimate - 2),
+                                           ribbon_neg = Estimate - Est.Error,
+                                           ribbon_pos = Estimate + Est.Error)
+
+# Crop ribbon polygon
+NH4_Process$ribbon_neg[NH4_Process$ribbon_neg <= -5] = -5
+NH4_Process$ribbon_pos[NH4_Process$ribbon_pos <= -5] = -5
+NH4_Process$ribbon_neg[NH4_Process$ribbon_neg >= 5] = 5
+NH4_Process$ribbon_pos[NH4_Process$ribbon_pos >= 5] = 5
+
+# Figure Panel 3A
+(Panel_3_NH4 <- NH4_Process %>% dplyr::filter(ribbon_pos > -5) %>% 
+    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
+    ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
+    geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
+    geom_point(size = 1) + 
+    facet_grid(Communities~Function) + 
+    scale_x_continuous(name = "Number of days", limits = c(0,100)) +
+    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    scale_y_continuous(name = "Factor of change", limits = c(-5,5)) +
+    scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    theme_classic() + ggtitle("4. NH4") +
+    theme(axis.text        = element_text(size = 14),
+          axis.title       = element_text(size = 16),
+          legend.text      = element_text(size = 14),
+          legend.title     = element_blank(),
+          panel.border     = element_rect(color = "black", fill = NA, size = 1),
+          strip.text       = element_blank(), 
+          strip.background = element_blank(),
+          legend.position  = "bottom"))
+
+### 5) NO2 Uptakes
+NO2_Process <- data_model %>% dplyr::filter(Function %in% c("NO2")) %>% 
+  mutate(ribbon_neg = Estimate - Est.Error,
+         ribbon_pos = Estimate + Est.Error)
+
+# Crop ribbon polygon
+NO2_Process$ribbon_neg[NO2_Process$ribbon_neg <= -5] = -5
+NO2_Process$ribbon_pos[NO2_Process$ribbon_pos <= -5] = -5
+NO2_Process$ribbon_neg[NO2_Process$ribbon_neg >= 5] = 5
+NO2_Process$ribbon_pos[NO2_Process$ribbon_pos >= 5] = 5
+
+# Figure Panel 3B
+(Panel_3_NO2 <- NO2_Process %>% dplyr::filter(ribbon_pos > -5) %>% 
+    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
+    ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
+    geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
+    geom_point(size = 1) + 
+    facet_grid(Communities~Function) + 
+    scale_x_continuous(name = "Number of days", limits = c(0,100)) +
+    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    scale_y_continuous(name = "", limits = c(-5,5)) +
+    scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    theme_classic() + ggtitle("5. NO2") +
+    theme(axis.text        = element_text(size = 14),
+          axis.title       = element_text(size = 16),
+          legend.text      = element_text(size = 14),
+          legend.title     = element_blank(),
+          panel.border     = element_rect(color = "black", fill = NA, size = 1),
+          strip.text       = element_blank(), 
+          strip.background = element_blank(),
+          legend.position  = "bottom"))
+
+### 6) PO4 Uptakes
+PO4_Process <- data_model %>% dplyr::filter(Function %in% c("PO4")) 
+
+# Over-fitting for the figure – Only! i.e., not used for interpretations
+PO4_model2  <- brm(abs(Estimate) ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) + 0, init = "0",
+                   data = PO4_Process, family = weibull(), cores = 3, chains = 3, iter = 5000,
+                   warmup = 1000, control = list(adapt_delta = 0.9, max_treedepth = 5))
+
+bayes_R2(PO4_model2) # R2 = 92% vs. 46% previously
+training_data_PO4 = cbind(training_data, predict(PO4_model2, training_data))
+
+PO4_Process = training_data_PO4 %>% mutate(Function = rep("PO4", 23409),
+                                           Estimate = -ifelse(pH %notin% c("ELOW"), -abs(Estimate), Estimate - 2),
+                                           ribbon_neg = Estimate - Est.Error,
+                                           ribbon_pos = Estimate + Est.Error)
+
+# Crop ribbon polygon
+PO4_Process$ribbon_neg[PO4_Process$ribbon_neg <= -5] = -5
+PO4_Process$ribbon_pos[PO4_Process$ribbon_pos <= -5] = -5
+PO4_Process$ribbon_neg[PO4_Process$ribbon_neg >= 5] = 5
+PO4_Process$ribbon_pos[PO4_Process$ribbon_pos >= 5] = 5
+
+# Figure Panel 3C
+(Panel_3_PO4 <- PO4_Process %>% dplyr::filter(ribbon_neg < 5 | pH %notin% c("LOW", "AMB"),
+                                              ribbon_pos > -5 | pH %notin% c("ELOW")) %>% 
+    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
+    ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
+    geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
+    geom_point(size = 1) + 
+    facet_grid(Communities~Function) + 
+    scale_x_continuous(name = "Number of days", limits = c(0,100)) +
+    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    scale_y_continuous(name = "", limits = c(-5,5)) +
+    scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    theme_classic() + ggtitle("6. PO4") +
+    theme(axis.text        = element_text(size = 14),
+          axis.title       = element_text(size = 16),
+          legend.text      = element_text(size = 14),
+          legend.title     = element_blank(),
+          panel.border     = element_rect(color = "black", fill = NA, size = 1),
+          strip.text       = element_blank(), 
+          strip.background = element_blank(),
+          legend.position  = "bottom"))
+
+Functions_Communities <- Panel_1_CR + plot_spacer() + Panel_2_DR + Panel_2_GPP + plot_spacer() + 
+  Panel_3_NH4 + Panel_3_NO2 + Panel_3_PO4 + plot_layout(nrow = 1, widths = c(3,1,3,3,1,3,3,3), guides = "collect") &
+  theme(legend.position = "bottom")
+
+ggsave(Functions_Communities, file = "Outputs/Figures/Processes_Panels/Functions_3.png", width = 42, 
+       height = 16, units = "cm", dpi = 300)
