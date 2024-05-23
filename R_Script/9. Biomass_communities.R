@@ -39,7 +39,7 @@ for (i in 1:18) {
                                             rep("T2", length(Tile_cover[[i]]$Species)), rep("T3", length(Tile_cover[[i]]$Species))),
                                 Cover   = c(Tile_cover[[i]]$T0, Tile_cover[[i]]$T1, Tile_cover[[i]]$T2, Tile_cover[[i]]$T3)) }
 Tile_cover = bind_rows(Tile_cover)
-Tile_cover <- Tile_cover %>% left_join(corrected_names) %>% select(-c(Species, ...1, functional.group)) %>% 
+Tile_cover <- Tile_cover %>% left_join(corrected_names) %>% select(-c(Species, functional.group)) %>% 
   rename(Species = species_new) %>% filter(!grepl("dead", Species)) %>% 
   filter(Species != "tile") %>% left_join(Zone_pH)
 Tile_cover_AMB  <- Tile_cover %>% dplyr::filter(pH == "AMB")
