@@ -79,72 +79,7 @@ C = ggplot(data = Tile_cover_ELOW, aes(x = factor(Time, levels = c("T0", "T1")),
   scale_fill_manual(values = col_ELO$Color) +
   ggtitle("Ambient – Front") + theme_extreme_low(panel_background_color = "white")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Total cover (/70)
+# Front cover (/50)
 Tile_cover_T0 = vector("list", 18) ; Tile_cover_T1 = vector("list", 18) ; Tile_cover = vector("list", 18)
 for (i in 1:18) {
   Tile_cover_T0[[i]] <- datasets[[i]] %>% column_to_rownames("Species") %>% select(matches("_t1_")) %>%
