@@ -143,14 +143,6 @@ dataset_change_viz %>%
   geom_jitter(color = "black", shape = 21, alpha = .7) +
   facet_grid(pH~Process)
 
-##### Work with ranges
-dataset_change = dataset_change %>% mutate(range = cut(change_std, breaks = c(-1000, -200, -100, seq(-10, 10, 1), 100, 200, 1000), 
-                                                       include.lowest = T)) %>% arrange(range)
-chosen_range   = data.frame(range           = unique(dataset_change$range),
-                            arbitrary_value = seq(1, length(unique(dataset_change$range)), 1),
-                            color           = values_grandient_color)
-dataset_change = dataset_change %>% left_join(chosen_range) %>% arrange(Tile, Time)
-
 ##### Define according to communities
 Comm = data.frame(Communities = c(rep("Mixed", 6), rep("forest", 6), rep("encrusting", 6)),
                   Tile = c("tile_03", "tile_04", "tile_05", "tile_06", "tile_08", "tile_29",
@@ -205,7 +197,7 @@ NH3_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +
 bayes_R2(NH3_model) # R2 = 48%
 training_data_NH3 = cbind(training_data, predict(NH3_model, training_data))
 # change back the sign
-training_data_NH3$Estimate[training_data_NH3$pH %in% c("LOW","ELOW")] = -training_data_NH3$Estimate[training_data_NH3$pH %in% c("LOW","ELOW")]+2
+training_data_NH3$Estimate[training_data_NH3$pH %in% c("AMB")] = -training_data_NH3$Estimate[training_data_NH3$pH %in% c("AMB")]+2
 (NH3_plot = ggplot(training_data_NH3, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
     geom_point() + scale_y_continuous(limits = c(-15,15)))
 
@@ -279,11 +271,35 @@ data_model %>% # dplyr::filter(Communities == "Mixed") %>%
   scale_x_continuous(name = "number of days", limits = c(0,100)) +
   scale_y_continuous(name = "factor_of_change", limits = c(-5,5)) 
 
+####################################################
 ##### Split it according to brandl et al. 2018 #####
-### 1) Calcification rates
+####################################################
+
+###### Panel 1 ----
+### CR ---
+process = "calcifcation rate"
+cste = 3.7 # Volume of the chamber
+Sa = 490 # If standardized by area
+Sa = 1 # If we do not want std by area
+T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T0 = mean(output_std) * cste / Sa, sd_T0 = sd(output_std) * cste) 
+T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T3 = mean(output_std) * cste / Sa, sd_T3 = sd(output_std) * cste) 
+T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
+(T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+    group_by(Communities) %>% 
+    summarise(mean_T0 = mean(output_std * cste / Sa)))
+
 CR_Process <- data_model %>% dplyr::filter(Function %in% c("CR")) %>% 
   mutate(ribbon_neg = Estimate - Est.Error,
-         ribbon_pos = ribbon_neg + 1.7*Est.Error)
+         ribbon_pos = ribbon_neg + 1.7*Est.Error) %>%
+  mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
+                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
+                            Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
+                            Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
+                            TRUE ~ .)))
 
 # Crop ribbon polygon
 CR_Process$ribbon_neg[CR_Process$ribbon_neg <= -5] = -5
@@ -294,42 +310,63 @@ min_day = CR_Process %>% dplyr::filter(nb_days <= 50 | pH != "ELOW", ribbon_pos 
   group_by(Communities) %>% summarise(min = min(nb_days)) %>% summarise(min = max(min))
 
 # Figure Panel 1
-(Panel_1_CR <- CR_Process %>% 
-  mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
-  dplyr::filter(nb_days <= min_day$min | pH != "ELOW") %>% 
-  ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
-  geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
-  geom_point(size = 1) + 
-  facet_grid(Communities~Function) + 
-  scale_x_continuous(name = "Number of days", limits = c(0,100)) +
-  geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
-  scale_y_continuous(name = "Factor of change", limits = c(-5,5)) +
-  scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
-  scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
-  theme_classic() + ggtitle("1. Calcification Rate") +
-  theme(axis.text        = element_text(size = 14),
-        axis.title       = element_text(size = 16),
-        legend.text      = element_text(size = 14),
-        legend.title     = element_blank(),
-        panel.border     = element_rect(color = "black", fill = NA, size = 1),
-        strip.text       = element_blank(), 
-        strip.background = element_blank(),
-        legend.position  = "bottom"))
+(Panel_1_CR <- CR_Process %>% dplyr::filter(ribbon_neg < 5 | pH %notin% c("LOW", "AMB"),
+                                            ribbon_pos > -5 | pH %notin% c("ELOW")) %>% 
+    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
+    dplyr::filter(nb_days <= min_day$min | pH != "ELOW") %>% 
+    ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
+    geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
+    geom_point(size = 1) + 
+    facet_grid(Communities~Function) + 
+    scale_x_continuous(name = "Number of days", limits = c(0,100)) +
+    #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    scale_y_continuous(name = "Factor of change", limits = c(-5,5)) +
+    scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
+    theme_classic() + ggtitle("1. Calcification Rate") +
+    theme(axis.text        = element_text(size = 14),
+          axis.title       = element_text(size = 16),
+          legend.text      = element_text(size = 14),
+          legend.title     = element_blank(),
+          panel.border     = element_rect(color = "black", fill = NA, size = 1),
+          strip.text       = element_blank(), 
+          strip.background = element_blank(),
+          legend.position  = "bottom"))
 
-### 2) Respiration rates
+###### Panel 2 ----
+### DR ---
+
 DR_Process <- data_model %>% dplyr::filter(Function %in% c("DR")) 
-
 # Over-fitting for the figure – Only! i.e., not used for interpretations
 DR_model2  <- brm(Estimate ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) + 0, init = "0",
-                 data = DR_Process, family = weibull(), cores = 3, chains = 3, iter = 5000,
-                 warmup = 1000, control = list(adapt_delta = 0.9, max_treedepth = 5))
-
+                  data = DR_Process, family = weibull(), cores = 3, chains = 3, iter = 5000,
+                  warmup = 1000, control = list(adapt_delta = 0.9, max_treedepth = 5))
 bayes_R2(DR_model2) # R2 = 63% vs. 43% previously
 training_data_DR = cbind(training_data, predict(DR_model2, training_data))
 
-DR_Process = training_data_DR %>% mutate(Function = rep("DR", 23409),
-                                         ribbon_neg = Estimate - Est.Error,
-                                         ribbon_pos = Estimate + Est.Error)
+process = "dark respiration rate"
+cste = 113.2469 # from mg/L to umol/L
+T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T0 = mean(output_std) * cste / Sa, sd_T0 = sd(output_std) * cste) 
+T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T3 = mean(output_std) * cste / Sa, sd_T3 = sd(output_std) * cste) 
+T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
+(T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+    group_by(Communities) %>% 
+    summarise(mean_T0 = -mean(output_std * cste / Sa)) )
+
+# Convert values to be on the same scale
+DR_Process = training_data_DR %>% 
+  mutate(Function = rep("DR", 23409), ribbon_neg = Estimate - Est.Error,
+         ribbon_pos = Estimate + Est.Error) %>% 
+  mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
+                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
+                            Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
+                            Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
+                            T ~ .)))
+
 # Crop ribbon polygon
 DR_Process$ribbon_neg[DR_Process$ribbon_neg <= -5] = -5
 DR_Process$ribbon_pos[DR_Process$ribbon_pos <= -5] = -5
@@ -344,7 +381,7 @@ DR_Process$ribbon_pos[DR_Process$ribbon_pos >= 5] = 5
     geom_point(size = 1) + 
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
-    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
     scale_y_continuous(name = "Factor of change", limits = c(-5,5)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
@@ -358,10 +395,29 @@ DR_Process$ribbon_pos[DR_Process$ribbon_pos >= 5] = 5
           strip.background = element_blank(),
           legend.position  = "bottom"))
 
-### 3) Gross Primary Production
+### GPP ---
+process = "gross photosynthesis rate"
+cste = 113.2469 # from mg/L to umol/L
+T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T0 = mean(output_std) * cste / Sa, sd_T0 = sd(output_std) * cste) 
+T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T3 = mean(output_std) * cste / Sa, sd_T3 = sd(output_std) * cste) 
+T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
+(T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+    group_by(Communities) %>% 
+    summarise(mean_T0 = mean(output_std * cste / Sa)) )
+
+# Convert values to be on the same scale
 GPP_Process <- data_model %>% dplyr::filter(Function %in% c("GPP")) %>% 
   mutate(ribbon_neg = Estimate - Est.Error,
-         ribbon_pos = ribbon_neg + 2*Est.Error)
+         ribbon_pos = ribbon_neg + 2*Est.Error) %>%
+  mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
+                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
+                            Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
+                            Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
+                            T ~ .)))
 
 # Crop ribbon polygon
 GPP_Process$ribbon_neg[GPP_Process$ribbon_neg <= -5] = -5
@@ -377,7 +433,7 @@ GPP_Process$ribbon_pos[GPP_Process$ribbon_pos >= 5] = 5
     geom_point(size = 1) + 
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
-    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
     scale_y_continuous(name = "", limits = c(-5,5)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
@@ -391,21 +447,42 @@ GPP_Process$ribbon_pos[GPP_Process$ribbon_pos >= 5] = 5
           strip.background = element_blank(),
           legend.position  = "bottom"))
 
-### 4) NH4 Uptakes
-NH4_Process <- data_model %>% dplyr::filter(Function %in% c("NH3"))
 
+###### Panel 3 ----
+### NH4 ---
+
+NH4_Process <- data_model %>% dplyr::filter(Function %in% c("NH3"))
 # Over-fitting for the figure – Only! i.e., not used for interpretations
 NH4_model2  <- brm(abs(Estimate) ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) + 0, init = "0",
-                  data = NH4_Process, family = weibull(), cores = 3, chains = 3, iter = 5000,
-                  warmup = 1000, control = list(adapt_delta = 0.9, max_treedepth = 5))
-
+                   data = NH4_Process, family = weibull(), cores = 3, chains = 3, iter = 5000,
+                   warmup = 1000, control = list(adapt_delta = 0.9, max_treedepth = 5))
 bayes_R2(NH4_model2) # R2 = 79% vs. 48% previously
 training_data_NH4 = cbind(training_data, predict(NH4_model2, training_data))
 
+process = "NH3"
+cste = 3.7
+T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T0 = mean(output_std) * cste, sd_T0 = sd(output_std) * cste) 
+T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T3 = mean(output_std) * cste, sd_T3 = sd(output_std) * cste) 
+T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
+(T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+    group_by(Communities) %>% 
+    summarise(mean_T0 = mean(output_std * cste)) )
+
+# Convert values to be on the same scale
 NH4_Process = training_data_NH4 %>% mutate(Function = rep("NH4", 23409),
-                                           Estimate = -ifelse(pH %notin% c("ELOW", "LOW"), -abs(Estimate), Estimate - 2),
+                                           Estimate = -ifelse(pH %notin% c("ELOW", "LOW"), 
+                                                              -abs(Estimate), Estimate - 2),
                                            ribbon_neg = Estimate - Est.Error,
-                                           ribbon_pos = Estimate + Est.Error)
+                                           ribbon_pos = Estimate + Est.Error) %>% 
+  mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
+                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
+                            Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
+                            Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
+                            T ~ .)))
 
 # Crop ribbon polygon
 NH4_Process$ribbon_neg[NH4_Process$ribbon_neg <= -5] = -5
@@ -421,7 +498,7 @@ NH4_Process$ribbon_pos[NH4_Process$ribbon_pos >= 5] = 5
     geom_point(size = 1) + 
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
-    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
     scale_y_continuous(name = "Factor of change", limits = c(-5,5)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
@@ -435,10 +512,29 @@ NH4_Process$ribbon_pos[NH4_Process$ribbon_pos >= 5] = 5
           strip.background = element_blank(),
           legend.position  = "bottom"))
 
-### 5) NO2 Uptakes
+### NO2 ---
+process = "NO2"
+cste = 3.7
+T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T0 = mean(output_std) * cste, sd_T0 = sd(output_std) * cste) 
+T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T3 = mean(output_std) * cste, sd_T3 = sd(output_std) * cste) 
+T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
+(T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+    group_by(Communities) %>% 
+    summarise(mean_T0 = mean(output_std * cste)) )
+
+# Convert values to be on the same scale
 NO2_Process <- data_model %>% dplyr::filter(Function %in% c("NO2")) %>% 
   mutate(ribbon_neg = Estimate - Est.Error,
-         ribbon_pos = Estimate + Est.Error)
+         ribbon_pos = Estimate + Est.Error) %>% 
+  mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
+                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
+                            Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
+                            Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
+                            T ~ .)))
 
 # Crop ribbon polygon
 NO2_Process$ribbon_neg[NO2_Process$ribbon_neg <= -5] = -5
@@ -454,7 +550,7 @@ NO2_Process$ribbon_pos[NO2_Process$ribbon_pos >= 5] = 5
     geom_point(size = 1) + 
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
-    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
     scale_y_continuous(name = "", limits = c(-5,5)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
@@ -468,21 +564,43 @@ NO2_Process$ribbon_pos[NO2_Process$ribbon_pos >= 5] = 5
           strip.background = element_blank(),
           legend.position  = "bottom"))
 
-### 6) PO4 Uptakes
-PO4_Process <- data_model %>% dplyr::filter(Function %in% c("PO4")) 
+### PO4 ---
 
+PO4_Process <- data_model %>% dplyr::filter(Function %in% c("PO4")) 
 # Over-fitting for the figure – Only! i.e., not used for interpretations
 PO4_model2  <- brm(abs(Estimate) ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) + 0, init = "0",
                    data = PO4_Process, family = weibull(), cores = 3, chains = 3, iter = 5000,
                    warmup = 1000, control = list(adapt_delta = 0.9, max_treedepth = 5))
-
 bayes_R2(PO4_model2) # R2 = 92% vs. 46% previously
 training_data_PO4 = cbind(training_data, predict(PO4_model2, training_data))
-
 PO4_Process = training_data_PO4 %>% mutate(Function = rep("PO4", 23409),
                                            Estimate = -ifelse(pH %notin% c("ELOW"), -abs(Estimate), Estimate - 2),
                                            ribbon_neg = Estimate - Est.Error,
                                            ribbon_pos = Estimate + Est.Error)
+
+process = "PO4"
+cste = 3.7
+T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T0 = mean(output_std) * cste, sd_T0 = sd(output_std) * cste) 
+T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
+  mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
+  summarise(mean_T3 = mean(output_std) * cste, sd_T3 = sd(output_std) * cste) 
+T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
+(T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
+    group_by(Communities) %>% 
+    summarise(mean_T0 = mean(output_std * cste)) )
+
+# Convert values to be on the same scale
+PO4_Process = training_data_PO4 %>% mutate(Function = rep("PO4", 23409),
+                                           Estimate = -ifelse(pH %notin% c("ELOW"), -abs(Estimate), Estimate - 2),
+                                           ribbon_neg = Estimate - Est.Error,
+                                           ribbon_pos = Estimate + Est.Error) %>% 
+  mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
+                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
+                            Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
+                            Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
+                            T ~ .)))
 
 # Crop ribbon polygon
 PO4_Process$ribbon_neg[PO4_Process$ribbon_neg <= -5] = -5
@@ -499,7 +617,7 @@ PO4_Process$ribbon_pos[PO4_Process$ribbon_pos >= 5] = 5
     geom_point(size = 1) + 
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
-    geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
+    #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
     scale_y_continuous(name = "", limits = c(-5,5)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
@@ -512,6 +630,8 @@ PO4_Process$ribbon_pos[PO4_Process$ribbon_pos >= 5] = 5
           strip.text       = element_blank(), 
           strip.background = element_blank(),
           legend.position  = "bottom"))
+
+### Final Plot std by biomass ---
 
 Functions_Communities <- Panel_1_CR + plot_spacer() + Panel_2_DR + Panel_2_GPP + plot_spacer() + 
   Panel_3_NH4 + Panel_3_NO2 + Panel_3_PO4 + plot_layout(nrow = 1, widths = c(3,1,3,3,1,3,3,3), guides = "collect") &

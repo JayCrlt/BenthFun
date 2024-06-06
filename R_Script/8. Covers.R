@@ -1,4 +1,3 @@
-rm(list = ls())
 options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
 `%notin%` = Negate(`%in%`)
 

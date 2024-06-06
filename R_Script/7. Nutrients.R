@@ -40,10 +40,9 @@ for (j in 1:12) {
     mutate(Sample = case_when(row_number() == 1 ~ "Blank", row_number() == 2 ~ "Blank", TRUE ~ as.character(Sample))) %>%
     group_by(Experiment, Phase, pH, Sample) %>% summarise_all(c(mean))
   Transplants_nut[[j]] <- rbind(T0, Transplants_nut[[j]][3:8,], Blank)
-  for (i in 1:7) {Transplants_nut[[j]][i+1,5:9] = Transplants_nut[[j]][i+1,5:9] - Transplants_nut[[j]][1, 5:9]}
-  for (i in 1:7) {Transplants_nut[[j]][i+1,5:9] = Transplants_nut[[j]][i+1,5:9] - Transplants_nut[[j]][8, 5:9]}
-  Transplants_nut[[j]] <- Transplants_nut[[j]][2:7,]
-}
+  for (i in 1:7) {Transplants_nut[[j]][i+1,5:9] = Transplants_nut[[j]][1,5:9] - Transplants_nut[[j]][i+1, 5:9] - 
+    Transplants_nut[[j]][8, 5:9]} # initial - final - blank_correction
+  Transplants_nut[[j]] <- Transplants_nut[[j]][2:7,]}
 
 Transplants_nut = Transplants_nut %>% bind_rows()
 
