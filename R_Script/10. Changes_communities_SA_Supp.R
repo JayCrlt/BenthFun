@@ -1,5 +1,5 @@
 ### Changes over time due to pH change
-rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl) ; library(brms)
+options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl) ; library(brms)
 `%notin%` = Negate(`%in%`)
 
 # Load data
@@ -7,12 +7,6 @@ Biomass   <- read_excel("Outputs/Summary/Biomass_Transplants_data.xlsx")
 Functions <- read_excel("Outputs/Summary/Summary_Process_BenthFun.xlsx") %>% dplyr::filter(Main_Exp == "Transplants")
 Nutrients <- read_excel("Outputs/Summary/Nutrients_Transplants_data.xlsx")
 PAR_tiles <- read_excel("Outputs/Summary/PAR_Transplants.xlsx") 
-
-# Colors
-values_grandient_color = c("#402d21", "#553c2c", "#704f3a", "#805b43", "#90664b", "#a07154", "#a67a5f",
-                           "#af8266", "#ba947b", "#c2a18b", "#cbae9b", "#d3bbab", "#e4d5cc", "#efe7e1", 
-                           "#ffffff", "#cee5c3", "#bbdbac", "#a4cf8f", "#9fcc8a", "#88c06d", "#7ab85c",
-                           "#6cb04c", "#629f44", "#578e3d", "#497733", "#3f662c", "#314f22")
 
 # Usefull functions
 element_textbox_highlight <- function(..., hi.labels = NULL, hi.fill = NULL,
@@ -56,15 +50,15 @@ dataset_change$pH[dataset_change$pH == "ambient pH conditions"] = "AMB"
 dataset_change_cal <- dataset_change %>% dplyr::filter(Process == "calcifcation rate") %>% 
   left_join(Biomass %>% dplyr::select(-c(Biomass_overall, Biomass_npp, Biomass_fil, 
                                          Biomass_std_overall, Biomass_std_cal, Biomass_std_npp, Biomass_std_fil)),
-            by = c("Tile", "pH", "Time")) %>% mutate(output_std = output / Biomass_cal) %>% select(-Biomass_cal)
+            by = c("Tile", "pH", "Time")) %>% mutate(output_std = output/490) %>% select(-Biomass_cal)
 dataset_change_npp <- dataset_change %>% dplyr::filter(Process == "gross photosynthesis rate") %>% 
   left_join(Biomass %>% dplyr::select(-c(Biomass_overall, Biomass_cal, Biomass_fil, 
                                          Biomass_std_overall, Biomass_std_cal, Biomass_std_npp, Biomass_std_fil)),
-            by = c("Tile", "pH", "Time")) %>% mutate(output_std = output / Biomass_npp) %>% select(-Biomass_npp)
+            by = c("Tile", "pH", "Time")) %>% mutate(output_std = output/490) %>% select(-Biomass_npp)
 dataset_change_tot <- dataset_change %>% dplyr::filter(Process %notin% c("calcifcation rate", "gross photosynthesis rate")) %>% 
   left_join(Biomass %>% dplyr::select(-c(Biomass_cal, Biomass_npp, Biomass_fil, 
                                          Biomass_std_overall, Biomass_std_cal, Biomass_std_npp, Biomass_std_fil)),
-            by = c("Tile", "pH", "Time")) %>% mutate(output_std = output / Biomass_overall) %>% select(-Biomass_overall)
+            by = c("Tile", "pH", "Time")) %>% mutate(output_std = output/490) %>% select(-Biomass_overall)
 
 ##### PAR CORRECTION ----
 ### Need to correct by the PAR!
@@ -159,23 +153,31 @@ dataset_change_CR = dataset_change %>% dplyr::filter(Process == "calcifcation ra
 CR_model  <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) + 0, init = "0",
                  data = dataset_change_CR, family = weibull(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(CR_model) # R2 = 47%
+bayes_R2(CR_model) # R2 = 20%
 training_data_CR = cbind(training_data, predict(CR_model, training_data))
 # change back the sign
 training_data_CR$Estimate[training_data_CR$pH == "ELOW"] = -training_data_CR$Estimate[training_data_CR$pH == "ELOW"]+2
 (CR_plot = ggplot(training_data_CR, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
     geom_point()+ scale_y_continuous(limits = c(-10,10)))
 
+dataset_change_CR %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% 
+  ggplot(., aes(y = output_std, fill = pH, x = Time)) + geom_boxplot(aes(fill = pH), outliers = F) + 
+  theme_classic() + scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
+
 # Dark respiration
 dataset_change_DR = dataset_change %>% dplyr::filter(Process == "dark respiration rate") %>% 
-  mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(pH != "ELOW" | Time != "T2")
+  mutate(change_std = abs(change_std) + 1e-26) 
 DR_model  <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) + 0, init = "0",
                  data = dataset_change_DR, family = weibull(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(DR_model) # R2 = 43%
+bayes_R2(DR_model) # R2 = 47%
 training_data_DR = cbind(training_data, predict(DR_model, training_data))
 (DR_plot = ggplot(training_data_DR, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
     geom_point()+ scale_y_continuous(limits = c(0,10)))
+
+dataset_change_DR %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% 
+  ggplot(., aes(y = output_std, fill = pH, x = Time)) + geom_boxplot(aes(fill = pH), outliers = F) + 
+  theme_classic() + scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
 
 # GPP
 dataset_change_GPP = dataset_change %>% dplyr::filter(Process == "gross photosynthesis rate") %>% 
@@ -183,49 +185,69 @@ dataset_change_GPP = dataset_change %>% dplyr::filter(Process == "gross photosyn
 GPP_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
                  data = dataset_change_GPP, family = weibull(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(GPP_model) # R2 = 53%
+bayes_R2(GPP_model) # R2 = 26%
 training_data_GPP = cbind(training_data, predict(GPP_model, training_data))
 (GPP_plot = ggplot(training_data_GPP, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
-    geom_point() + scale_y_continuous(limits = c(0,15)))
+    geom_point() + scale_y_continuous(limits = c(0,5)))
+
+dataset_change_GPP %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% 
+  ggplot(., aes(y = output_std, fill = pH, x = Time)) + geom_boxplot(aes(fill = pH), outliers = F) + 
+  geom_jitter(aes(fill = pH), shape = 21) +
+  theme_classic() + scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
 
 # NH3
 dataset_change_NH3 = dataset_change %>% dplyr::filter(Process == "NH3") %>% 
-  mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(pH != "ELOW" | Time != "T2")
+  mutate(change_std = abs(change_std) + 1e-26) 
 NH3_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
                  data = dataset_change_NH3, family = weibull(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(NH3_model) # R2 = 48%
+bayes_R2(NH3_model) # R2 = 9%
 training_data_NH3 = cbind(training_data, predict(NH3_model, training_data))
+training_data_NH3$Estimate = -training_data_NH3$Estimate
 # change back the sign
-training_data_NH3$Estimate = -training_data_NH3$Estimate 
 (NH3_plot = ggplot(training_data_NH3, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
-    geom_point() + scale_y_continuous(limits = c(-15,15)))
+    geom_point() + scale_y_continuous(limits = c(-5,5)))
+
+dataset_change_NH3 %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% 
+  ggplot(., aes(y = output_std, fill = pH, x = Time)) + geom_boxplot(aes(fill = pH), outliers = F) + 
+  #geom_jitter(aes(fill = pH), shape = 21) +
+  theme_classic() + scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
 
 # NO2
 dataset_change_NO2 = dataset_change %>% dplyr::filter(Process == "NO2") %>% 
-  mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(pH != "ELOW" | Time != "T2")
+  mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(pH != "ELOW" | Time != "T3")
 NO2_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
                  data = dataset_change_NO2, family = weibull(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(NO2_model) # R2 = 57%
+bayes_R2(NO2_model) # R2 = 42%
 training_data_NO2 = cbind(training_data, predict(NO2_model, training_data))
+training_data_NO2$Estimate = -training_data_NO2$Estimate
 # change back the sign
-training_data_NO2$Estimate = training_data_NO2$Estimate-2
 (NO2_plot = ggplot(training_data_NO2, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
-    geom_point() + scale_y_continuous(limits = c(-15,15)))
+    geom_point() + scale_y_continuous(limits = c(-4.0,0)))
 
-# NO3
+dataset_change_NO2 %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% 
+  ggplot(., aes(y = output_std, fill = pH, x = Time)) + geom_boxplot(aes(fill = pH), outliers = F) + 
+  #geom_jitter(aes(fill = pH), shape = 21) +
+  theme_classic() + scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
+
+# NO3 
 dataset_change_NO3 = dataset_change %>% dplyr::filter(Process == "NO3") %>% 
-  mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(pH != "AMB" | Time != "T3")
+  mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(pH %notin% c("ELOW", "AMB") | Time != "T3")
+
 NO3_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
                  data = dataset_change_NO3, family = weibull(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(NO3_model) # R2 = 48%
+bayes_R2(NO3_model) # R2 = 13%
 training_data_NO3 = cbind(training_data, predict(NO3_model, training_data))
-# change back the sign
 training_data_NO3$Estimate = -training_data_NO3$Estimate
+# change back the sign
 (NO3_plot = ggplot(training_data_NO3, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
-    geom_point() + scale_y_continuous(limits = c(-10,10)))
+    geom_point() + scale_y_continuous(limits = c(-2,0)))
+
+dataset_change_NO3 %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% 
+  ggplot(., aes(y = output_std, fill = pH, x = Time)) + geom_boxplot(aes(fill = pH), outliers = F) + 
+  theme_classic() + scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
 
 # PO4
 dataset_change_PO4 = dataset_change %>% dplyr::filter(Process == "PO4") %>% 
@@ -233,12 +255,16 @@ dataset_change_PO4 = dataset_change %>% dplyr::filter(Process == "PO4") %>%
 PO4_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
                  data = dataset_change_PO4, family = weibull(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(PO4_model) # R2 = 46%
+bayes_R2(PO4_model) # R2 = 10%
 training_data_PO4 = cbind(training_data, predict(PO4_model, training_data))
 # change back the sign
 training_data_PO4$Estimate = -training_data_PO4$Estimate
 (PO4_plot = ggplot(training_data_PO4, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
-    geom_point() + scale_y_continuous(limits = c(-25,25)))
+    geom_point() + scale_y_continuous(limits = c(-2,0)))
+
+dataset_change_PO4 %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% 
+  ggplot(., aes(y = output_std, fill = pH, x = Time)) + geom_boxplot(aes(fill = pH)) + 
+  theme_classic() + scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
 
 # SiO4
 dataset_change_SiO4 = dataset_change %>% dplyr::filter(Process == "SiO4") %>% 
@@ -246,16 +272,20 @@ dataset_change_SiO4 = dataset_change %>% dplyr::filter(Process == "SiO4") %>%
 SiO4_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
                   data = dataset_change_SiO4, family = weibull(), cores = 4, chains = 4, iter = 10000,
                   warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(SiO4_model) # R2 = 45%
+bayes_R2(SiO4_model) # R2 = 54%
 training_data_SiO4 = cbind(training_data, predict(SiO4_model, training_data))
 # change back the sign
 training_data_SiO4$Estimate = -training_data_SiO4$Estimate
-(SiO4_plot = ggplot(training_data_SiO4, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
-    geom_point() + scale_y_continuous(limits = c(-25,25)))
+(SiO4_plot = ggplot(training_data_SiO4, aes(y = -Estimate, x = nb_days, color = pH, shape = Communities)) + 
+    geom_point() + scale_y_continuous(limits = c(-5,5)))
+
+dataset_change_SiO4 %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% 
+  ggplot(., aes(y = output_std, fill = pH, x = Time)) + geom_boxplot(aes(fill = pH), outliers = F) + 
+  theme_classic() + scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
 
 # Merge everything
 data_model <- rbind(training_data_CR, training_data_DR, training_data_GPP, training_data_NH3, training_data_NO2,
-      training_data_NO3, training_data_PO4, training_data_SiO4) %>% 
+                    training_data_NO3, training_data_PO4, training_data_SiO4) %>% 
   mutate(Function = c(rep("CR", 23409), rep("DR", 23409), rep("GPP", 23409), rep("NH3", 23409), 
                       rep("NO2", 23409), rep("NO3", 23409), rep("PO4", 23409), rep("SiO4", 23409)))
 
@@ -271,25 +301,28 @@ data_model %>% # dplyr::filter(Communities == "Mixed") %>%
   scale_x_continuous(name = "number of days", limits = c(0,100)) +
   scale_y_continuous(name = "factor_of_change", limits = c(-5,5)) 
 
-####################################################
-##### Split it according to brandl et al. 2018 #####
-####################################################
+
+
+
+
+
+
 
 ###### Panel 1 ----
 ### CR ---
 process = "calcifcation rate"
 cste = 3.7 # Volume of the chamber
-Sa = 1     # If we do not want std by area
+Sa = 1   # If standardized by area | Already done before
 T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
   mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
-  summarise(mean_T0 = mean(output_std) * cste / Sa, sd_T0 = sd(output_std) * cste) 
+  summarise(mean_T0 = mean(output_std) / cste / Sa, sd_T0 = sd(output_std) * cste) 
 T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
   mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
-  summarise(mean_T3 = mean(output_std) * cste / Sa, sd_T3 = sd(output_std) * cste) 
+  summarise(mean_T3 = mean(output_std) / cste / Sa, sd_T3 = sd(output_std) * cste) 
 T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
 (T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
     group_by(Communities) %>% 
-    summarise(mean_T0 = mean(output_std * cste / Sa)))
+    summarise(mean_T0 = mean(output_std / cste / Sa)))
 
 CR_Process <- data_model %>% dplyr::filter(Function %in% c("CR")) %>% 
   mutate(ribbon_neg = Estimate - Est.Error,
@@ -300,26 +333,41 @@ CR_Process <- data_model %>% dplyr::filter(Function %in% c("CR")) %>%
                             Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
                             TRUE ~ .)))
 
+summary(lm(CR_Process_CI[[1]]$ribbon_pos~ CR_Process_CI[[1]]$nb_days))
+
+# ELOW CI upper part()
+CR_Process_CI = CR_Process %>% dplyr::filter(pH == "ELOW", nb_days < 20) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = CR_Process_CI[[1]]), 
+                  CR_Process %>% dplyr::filter(pH == "ELOW", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = CR_Process_CI[[2]]), 
+                  CR_Process %>% dplyr::filter(pH == "ELOW", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = CR_Process_CI[[3]]), 
+                  CR_Process %>% dplyr::filter(pH == "ELOW", Communities == "encrusting")) %>% as.numeric()
+
+CR_Process$ribbon_pos[CR_Process$pH == "ELOW" & CR_Process$Communities == "Mixed"] = CI_UP_1
+CR_Process$ribbon_pos[CR_Process$pH == "ELOW" & CR_Process$Communities == "forest"] = CI_UP_2
+CR_Process$ribbon_pos[CR_Process$pH == "ELOW" & CR_Process$Communities == "encrusting"] = CI_UP_3
+
 # Crop ribbon polygon
-CR_Process$ribbon_neg[CR_Process$ribbon_neg <= -5] = -5
-CR_Process$ribbon_pos[CR_Process$ribbon_pos <= -5] = -5
-CR_Process$ribbon_neg[CR_Process$ribbon_neg >= 5] = 5
-CR_Process$ribbon_pos[CR_Process$ribbon_pos >= 5] = 5
-min_day = CR_Process %>% dplyr::filter(nb_days <= 50 | pH != "ELOW", ribbon_pos <=-5) %>%
+CR_Process$ribbon_neg[CR_Process$ribbon_neg <= -2] = -2
+CR_Process$ribbon_pos[CR_Process$ribbon_pos <= -2] = -2
+CR_Process$ribbon_neg[CR_Process$ribbon_neg >= 2] = 2
+CR_Process$ribbon_pos[CR_Process$ribbon_pos >= 2] = 2
+min_day = CR_Process %>% dplyr::filter(nb_days <= 50 | pH != "ELOW", ribbon_pos <=-2) %>%
   group_by(Communities) %>% summarise(min = min(nb_days)) %>% summarise(min = max(min))
 
 # Figure Panel 1
-(Panel_1_CR <- CR_Process %>% dplyr::filter(ribbon_neg < 5 | pH %notin% c("LOW", "AMB"),
-                                            ribbon_pos > -5 | pH %notin% c("ELOW")) %>% 
+(Panel_1_CR <- CR_Process %>% 
     mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
-    dplyr::filter(nb_days <= min_day$min | pH != "ELOW") %>% 
+    #dplyr::filter(nb_days <= min_day$min | pH != "ELOW") %>% 
     ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
     geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
     geom_point(size = 1) + 
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
     #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
-    scale_y_continuous(name = "Factor of change", limits = c(-5,5)) +
+    scale_y_continuous(name = "Factor of change", limits = c(-2,2)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     theme_classic() + ggtitle("1. Calcification Rate") +
@@ -340,7 +388,7 @@ DR_Process <- data_model %>% dplyr::filter(Function %in% c("DR"))
 DR_model2  <- brm(Estimate ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) + 0, init = "0",
                   data = DR_Process, family = weibull(), cores = 3, chains = 3, iter = 5000,
                   warmup = 1000, control = list(adapt_delta = 0.9, max_treedepth = 5))
-bayes_R2(DR_model2) # R2 = 63% vs. 43% previously
+bayes_R2(DR_model2) # R2 = 84% vs. 47% previously
 training_data_DR = cbind(training_data, predict(DR_model2, training_data))
 
 process = "dark respiration rate"
@@ -358,8 +406,8 @@ T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in d
 
 # Convert values to be on the same scale
 DR_Process = training_data_DR %>% 
-  mutate(Function = rep("DR", 23409), ribbon_neg = Estimate - Est.Error,
-         ribbon_pos = Estimate + Est.Error) %>% 
+  mutate(Function = rep("DR", 23409), ribbon_neg = Estimate - 1.3*Est.Error,
+         ribbon_pos = Estimate + 1.3*Est.Error) %>% 
   mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
                 ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
                             Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
@@ -395,7 +443,7 @@ DR_Process$ribbon_pos[DR_Process$ribbon_pos >= 5] = 5
           legend.position  = "bottom"))
 
 ### GPP ---
-process = "gross photosynthesis rate"
+process = "net photosynthesis rate"
 cste = 113.2469 # from mg/L to umol/L
 T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
   mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
@@ -419,10 +467,10 @@ GPP_Process <- data_model %>% dplyr::filter(Function %in% c("GPP")) %>%
                             T ~ .)))
 
 # Crop ribbon polygon
-GPP_Process$ribbon_neg[GPP_Process$ribbon_neg <= -5] = -5
-GPP_Process$ribbon_pos[GPP_Process$ribbon_pos <= -5] = -5
-GPP_Process$ribbon_neg[GPP_Process$ribbon_neg >= 5] = 5
-GPP_Process$ribbon_pos[GPP_Process$ribbon_pos >= 5] = 5
+GPP_Process$ribbon_neg[GPP_Process$ribbon_neg <= -2] = -2
+GPP_Process$ribbon_pos[GPP_Process$ribbon_pos <= -2] = -2
+GPP_Process$ribbon_neg[GPP_Process$ribbon_neg >= 2] = 2
+GPP_Process$ribbon_pos[GPP_Process$ribbon_pos >= 2] = 2
 
 # Figure Panel 2B
 (Panel_2_GPP <- GPP_Process %>% dplyr::filter(ribbon_neg < 5) %>% 
@@ -433,7 +481,7 @@ GPP_Process$ribbon_pos[GPP_Process$ribbon_pos >= 5] = 5
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
     #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
-    scale_y_continuous(name = "", limits = c(-5,5)) +
+    scale_y_continuous(name = "", limits = c(-2,2)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     theme_classic() + ggtitle("3. Gross Primary Production") +
@@ -446,51 +494,36 @@ GPP_Process$ribbon_pos[GPP_Process$ribbon_pos >= 5] = 5
           strip.background = element_blank(),
           legend.position  = "bottom"))
 
-
 ###### Panel 3 ----
 ### NH4 ---
 process = "NH3"
 cste = 3.7
 T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
   mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
-  summarise(mean_T0 = mean(output_std) * cste, sd_T0 = sd(output_std) * cste) 
+  summarise(mean_T0 = mean(output_std) * cste / Sa, sd_T0 = sd(output_std) * cste) 
 T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
   mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
-  summarise(mean_T3 = mean(output_std) * cste, sd_T3 = sd(output_std) * cste) 
+  summarise(mean_T3 = mean(output_std) * cste / Sa, sd_T3 = sd(output_std) * cste) 
 T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
 (T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
     group_by(Communities) %>% 
-    summarise(mean_T0 = mean(output_std * cste)) )
+    summarise(mean_T0 = mean(output_std * cste / Sa)) )
 
 # Convert values to be on the same scale
-NH4_Process <- data_model %>% dplyr::filter(Function %in% c("NH3")) %>% 
+NH4_Process = data_model %>% dplyr::filter(Function %in% c("NH3")) %>% 
   mutate(ribbon_neg = Estimate - Est.Error,
-         ribbon_pos = ribbon_neg + 1.7*Est.Error) %>%
+         ribbon_pos = ribbon_neg + 2*Est.Error) %>%
   mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
                 ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
                             Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
                             Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
-                            TRUE ~ .)))
-
-# ELOW CI upper part()
-NH4_Process_CI = NH4_Process %>% dplyr::filter(pH == "ELOW", nb_days < 60) %>% 
-  group_by(Communities) %>% group_split()
-CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[1]]), 
-                  NH4_Process %>% dplyr::filter(pH == "ELOW", Communities == "Mixed")) %>% as.numeric()
-CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[2]]), 
-                  NH4_Process %>% dplyr::filter(pH == "ELOW", Communities == "forest")) %>% as.numeric()
-CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[3]]), 
-                  NH4_Process %>% dplyr::filter(pH == "ELOW", Communities == "encrusting")) %>% as.numeric()
-
-NH4_Process$ribbon_pos[NH4_Process$pH == "ELOW" & NH4_Process$Communities == "Mixed"] = CI_UP_1
-NH4_Process$ribbon_pos[NH4_Process$pH == "ELOW" & NH4_Process$Communities == "forest"] = CI_UP_2
-NH4_Process$ribbon_pos[NH4_Process$pH == "ELOW" & NH4_Process$Communities == "encrusting"] = CI_UP_3
+                            T ~ .)))
 
 # Crop ribbon polygon
-NH4_Process$ribbon_neg[NH4_Process$ribbon_neg <= -5] = -5
-NH4_Process$ribbon_pos[NH4_Process$ribbon_pos <= -5] = -5
-NH4_Process$ribbon_neg[NH4_Process$ribbon_neg >= 5] = 5
-NH4_Process$ribbon_pos[NH4_Process$ribbon_pos >= 5] = 5
+NH4_Process$ribbon_neg[NH4_Process$ribbon_neg <= -3] = -3
+NH4_Process$ribbon_pos[NH4_Process$ribbon_pos <= -3] = -3
+NH4_Process$ribbon_neg[NH4_Process$ribbon_neg >= 3] = 3
+NH4_Process$ribbon_pos[NH4_Process$ribbon_pos >= 3] = 3
 
 # Figure Panel 3A
 (Panel_3_NH4 <- NH4_Process %>% dplyr::filter(ribbon_pos > -5) %>% 
@@ -501,7 +534,7 @@ NH4_Process$ribbon_pos[NH4_Process$ribbon_pos >= 5] = 5
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
     #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
-    scale_y_continuous(name = "Factor of change", limits = c(-5,5)) +
+    scale_y_continuous(name = "Factor of change", limits = c(-3,3), breaks = seq(-3,3,1.5)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     theme_classic() + ggtitle("4. NH4") +
@@ -519,14 +552,14 @@ process = "NO3"
 cste = 3.7
 T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
   mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
-  summarise(mean_T0 = mean(output_std) * cste, sd_T0 = sd(output_std) * cste) 
+  summarise(mean_T0 = mean(output_std) * cste / Sa, sd_T0 = sd(output_std) * cste) 
 T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
   mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
-  summarise(mean_T3 = mean(output_std) * cste, sd_T3 = sd(output_std) * cste) 
+  summarise(mean_T3 = mean(output_std) * cste / Sa, sd_T3 = sd(output_std) * cste) 
 T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
 (T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
     group_by(Communities) %>% 
-    summarise(mean_T0 = mean(output_std * cste)) )
+    summarise(mean_T0 = mean(output_std * cste / Sa)) )
 
 # Convert values to be on the same scale
 NO3_Process <- data_model %>% dplyr::filter(Function %in% c("NO3")) %>% 
@@ -538,56 +571,14 @@ NO3_Process <- data_model %>% dplyr::filter(Function %in% c("NO3")) %>%
                             Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
                             T ~ .)))
 
-# ELOW CI upper part()
-NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "ELOW", nb_days < 80) %>% 
-  group_by(Communities) %>% group_split()
-CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[1]]), 
-                  NO3_Process %>% dplyr::filter(pH == "ELOW", Communities == "Mixed")) %>% as.numeric()
-CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[2]]), 
-                  NO3_Process %>% dplyr::filter(pH == "ELOW", Communities == "forest")) %>% as.numeric()
-CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[3]]), 
-                  NO3_Process %>% dplyr::filter(pH == "ELOW", Communities == "encrusting")) %>% as.numeric()
-
-NO3_Process$ribbon_pos[NO3_Process$pH == "ELOW" & NO3_Process$Communities == "Mixed"] = CI_UP_1
-NO3_Process$ribbon_pos[NO3_Process$pH == "ELOW" & NO3_Process$Communities == "forest"] = CI_UP_2
-NO3_Process$ribbon_pos[NO3_Process$pH == "ELOW" & NO3_Process$Communities == "encrusting"] = CI_UP_3
-
-# AMB CI upper part()
-NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "AMB") %>% 
-  group_by(Communities) %>% group_split()
-CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[1]]), 
-                  NO3_Process %>% dplyr::filter(pH == "AMB", Communities == "Mixed")) %>% as.numeric()
-CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[2]]), 
-                  NO3_Process %>% dplyr::filter(pH == "AMB", Communities == "forest")) %>% as.numeric()
-CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[3]]), 
-                  NO3_Process %>% dplyr::filter(pH == "AMB", Communities == "encrusting")) %>% as.numeric()
-
-NO3_Process$ribbon_pos[NO3_Process$pH == "AMB" & NO3_Process$Communities == "Mixed"] = CI_UP_1
-NO3_Process$ribbon_pos[NO3_Process$pH == "AMB" & NO3_Process$Communities == "forest"] = CI_UP_2
-NO3_Process$ribbon_pos[NO3_Process$pH == "AMB" & NO3_Process$Communities == "encrusting"] = CI_UP_3
-
-# AMB CI lower part()
-NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "AMB") %>% 
-  group_by(Communities) %>% group_split()
-CI_UP_1 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NO3_Process_CI[[1]]), 
-                  NO3_Process %>% dplyr::filter(pH == "AMB", Communities == "Mixed")) %>% as.numeric()
-CI_UP_2 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NO3_Process_CI[[2]]), 
-                  NO3_Process %>% dplyr::filter(pH == "AMB", Communities == "forest")) %>% as.numeric()
-CI_UP_3 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NO3_Process_CI[[3]]), 
-                  NO3_Process %>% dplyr::filter(pH == "AMB", Communities == "encrusting")) %>% as.numeric()
-
-NO3_Process$ribbon_neg[NO3_Process$pH == "AMB" & NO3_Process$Communities == "Mixed"] = CI_UP_1
-NO3_Process$ribbon_neg[NO3_Process$pH == "AMB" & NO3_Process$Communities == "forest"] = CI_UP_2
-NO3_Process$ribbon_neg[NO3_Process$pH == "AMB" & NO3_Process$Communities == "encrusting"] = CI_UP_3
-
 # Crop ribbon polygon
-NO3_Process$ribbon_neg[NO3_Process$ribbon_neg <= -5] = -5
-NO3_Process$ribbon_pos[NO3_Process$ribbon_pos <= -5] = -5
-NO3_Process$ribbon_neg[NO3_Process$ribbon_neg >= 5] = 5
-NO3_Process$ribbon_pos[NO3_Process$ribbon_pos >= 5] = 5
+NO3_Process$ribbon_neg[NO3_Process$ribbon_neg <= -2] = -2
+NO3_Process$ribbon_pos[NO3_Process$ribbon_pos <= -2] = -2
+NO3_Process$ribbon_neg[NO3_Process$ribbon_neg >= 2] = 2
+NO3_Process$ribbon_pos[NO3_Process$ribbon_pos >= 2] = 2
 
 # Figure Panel 3B
-(Panel_3_NO3 <- NO3_Process %>% dplyr::filter(ribbon_pos > -5) %>% 
+(Panel_3_NO3 <- NO3_Process %>% dplyr::filter(ribbon_pos > -2) %>% 
     mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
     ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
     geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
@@ -595,7 +586,7 @@ NO3_Process$ribbon_pos[NO3_Process$ribbon_pos >= 5] = 5
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
     #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
-    scale_y_continuous(name = "", limits = c(-5,5)) +
+    scale_y_continuous(name = "", limits = c(-2,2)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     theme_classic() + ggtitle("5. NO3") +
@@ -613,19 +604,19 @@ process = "PO4"
 cste = 3.7
 T0 <- dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
   mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
-  summarise(mean_T0 = mean(output_std) * cste, sd_T0 = sd(output_std) * cste) 
+  summarise(mean_T0 = mean(output_std) * cste / Sa, sd_T0 = sd(output_std) * cste) 
 T3 <- dataset_change %>% dplyr::filter(Process == process, Time == "T3") %>% drop_na() %>% 
   mutate(output_std = output_std) %>% group_by(Communities, pH) %>% 
-  summarise(mean_T3 = mean(output_std) * cste, sd_T3 = sd(output_std) * cste) 
+  summarise(mean_T3 = mean(output_std) * cste / Sa, sd_T3 = sd(output_std) * cste) 
 T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in details
 (T0 = dataset_change %>% dplyr::filter(Process == process, Time == "T0") %>% drop_na() %>% 
     group_by(Communities) %>% 
-    summarise(mean_T0 = mean(output_std * cste)) )
+    summarise(mean_T0 = mean(output_std * cste / Sa)) )
 
 # Convert values to be on the same scale
-PO4_Process <- data_model %>% dplyr::filter(Function %in% c("PO4")) %>% 
+PO4_Process = data_model %>% dplyr::filter(Function %in% c("PO4")) %>% 
   mutate(ribbon_neg = Estimate - Est.Error,
-         ribbon_pos = ribbon_neg + 1.7*Est.Error) %>% 
+         ribbon_pos = Estimate + Est.Error) %>% 
   mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
                 ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
                             Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
@@ -633,10 +624,10 @@ PO4_Process <- data_model %>% dplyr::filter(Function %in% c("PO4")) %>%
                             T ~ .)))
 
 # Crop ribbon polygon
-PO4_Process$ribbon_neg[PO4_Process$ribbon_neg <= -5] = -5
-PO4_Process$ribbon_pos[PO4_Process$ribbon_pos <= -5] = -5
-PO4_Process$ribbon_neg[PO4_Process$ribbon_neg >= 5] = 5
-PO4_Process$ribbon_pos[PO4_Process$ribbon_pos >= 5] = 5
+PO4_Process$ribbon_neg[PO4_Process$ribbon_neg <= -3] = -3
+PO4_Process$ribbon_pos[PO4_Process$ribbon_pos <= -3] = -3
+PO4_Process$ribbon_neg[PO4_Process$ribbon_neg >= 3] = 3
+PO4_Process$ribbon_pos[PO4_Process$ribbon_pos >= 3] = 3
 
 # Figure Panel 3C
 (Panel_3_PO4 <- PO4_Process %>% dplyr::filter(ribbon_neg < 5 | pH %notin% c("LOW", "AMB"),
@@ -644,12 +635,12 @@ PO4_Process$ribbon_pos[PO4_Process$ribbon_pos >= 5] = 5
     mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting")),
            pH = fct_relevel(pH, c("AMB", "LOW", "ELOW"))) %>% 
     ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
-    geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5, show.legend = F) +
-    geom_point(size = 1, show.legend = F) + 
+    geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
+    geom_point(size = 1) + 
     facet_grid(Communities~Function) + 
     scale_x_continuous(name = "Number of days", limits = c(0,100)) +
     #geom_segment(aes(x = 0, y = 1, xend = 100, yend = 1), colour = "black", linetype = "dotted", size = .5) +
-    scale_y_continuous(name = "", limits = c(-5,5)) +
+    scale_y_continuous(name = "", limits = c(-3,3), breaks = seq(-3,3,1.5)) +
     scale_color_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     scale_fill_manual(values=c("firebrick2", "goldenrod1", "royalblue3"), labels = c("Extreme Low", "Low", "Ambient")) +
     theme_classic() + ggtitle("6. PO4") +
@@ -668,5 +659,5 @@ Functions_Communities <- Panel_1_CR + plot_spacer() + Panel_2_DR + Panel_2_GPP +
   Panel_3_NH4 + Panel_3_NO3 + Panel_3_PO4 + plot_layout(nrow = 1, widths = c(3,1,3,3,1,3,3,3), guides = "collect") &
   theme(legend.position = "bottom")
 
-ggsave(Functions_Communities, file = "Outputs/Figures/Processes_Panels/Functions_3.png", width = 42, 
+ggsave(Functions_Communities, file = "Outputs/Figures/Processes_Panels/Functions_3_Std_Area.png", width = 42, 
        height = 16, units = "cm", dpi = 300)
