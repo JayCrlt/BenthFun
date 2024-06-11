@@ -361,5 +361,59 @@ ELO_merged_enc_plot_2 <- ELO_merged_enc %>%
     (ELO_merged_for_plot + ELO_merged_mix_plot + ELO_merged_enc_plot) /
     (ELO_merged_for_plot_2 + ELO_merged_mix_plot_2 + ELO_merged_enc_plot_2) + plot_layout(guides = "collect", nrow = 6)) & theme(legend.position = "none")
 
+### SImplification
+Cover_simplified = 
+  rbind(AMB_merged_for_plot$data, AMB_merged_mix_plot$data, AMB_merged_enc_plot$data,
+        LOW_merged_for_plot$data, LOW_merged_mix_plot$data, LOW_merged_enc_plot$data,
+        ELO_merged_for_plot$data, ELO_merged_mix_plot$data, ELO_merged_enc_plot$data,
+        AMB_merged_for_plot_2$data, AMB_merged_mix_plot_2$data, AMB_merged_enc_plot_2$data,
+        LOW_merged_for_plot_2$data, LOW_merged_mix_plot_2$data, LOW_merged_enc_plot_2$data,
+        ELO_merged_for_plot_2$data, ELO_merged_mix_plot_2$data, ELO_merged_enc_plot_2$data) %>% 
+  data.frame() %>% 
+  mutate(Tile_side = c(rep("Front", 816), rep("Back", 628)),
+         Comm = c(rep("Forest", 88), rep("Mixed", 84), rep("Encrusting", 96),
+                  rep("Forest", 88), rep("Mixed", 104), rep("Encrusting", 120),
+                  rep("Forest", 76), rep("Mixed", 80), rep("Encrusting", 80),
+                  rep("Forest", 72), rep("Mixed", 72), rep("Encrusting", 52),
+                  rep("Forest", 80), rep("Mixed", 88), rep("Encrusting", 72),
+                  rep("Forest", 72), rep("Mixed", 64), rep("Encrusting", 56))) %>% 
+  select(-`.group`) %>% 
+  group_by(Time, taxonomy, pH, Tile_side, Comm) %>% 
+  summarise(Cover = sum(Cover))
+
+# Colors
+taxonomy_order <- c("non-alive", "Turf", "Chlorophyta", "Phaeophyceae", "Rhodophyta", "Porifera", 
+                    "Bryozoa", "Polychaeta", "Crustacea", "Mollusca", "Tunicates")
+color_order    <- c("#ffffff", "#cae4b9", "#72b744", "#9a6618", "#e47fba", "#ff9b32", "#ffcc00", "#3d85c6", 
+                    "#a2c4c9", "#819ca0", "#8571b8")
+data_col = data.frame(taxonomy = taxonomy_order, Color = color_order)
+data_col$taxonomy   <- factor(data_col$taxonomy, levels = taxonomy_order)
+Cover_simplified$taxonomy <- factor(Cover_simplified$taxonomy, levels = taxonomy_order)
+
+Front_Simplified = Cover_simplified %>% dplyr::filter(Tile_side == "Front") %>% 
+  mutate(Comm = fct_relevel(Comm, c("Forest", "Mixed", "Encrusting"))) %>% 
+  ggplot(aes(x = factor(Time, levels = c("T0", "T1", "T2", "T3")), y = Cover, fill = taxonomy)) +
+  geom_col(position = "stack", color = "black", show.legend = F) +
+  scale_x_discrete(labels = c("", "", "", "")) +
+  labs(x = "", y = "Cover (%)", color = "Species") + theme_classic() +
+  facet_grid(pH ~ Comm) +
+  scale_fill_manual(values = data_col$Color[data_col$taxonomy %in% unique(Cover_simplified$taxonomy)]) + 
+  theme_ambient(panel_background_color = "white")
+
+Back_Simplified = Cover_simplified %>% dplyr::filter(Tile_side == "Back") %>% 
+  mutate(Comm = fct_relevel(Comm, c("Forest", "Mixed", "Encrusting"))) %>% 
+  ggplot(aes(x = factor(Time, levels = c("T0", "T1", "T2", "T3")), y = Cover, fill = taxonomy)) +
+  geom_col(position = "stack", color = "black", show.legend = F) +
+  scale_x_discrete(labels = c("", "", "", "")) +
+  labs(x = "", y = "Cover (%)", color = "Species") + theme_classic() +
+  facet_grid(pH ~ Comm) +
+  scale_fill_manual(values = data_col$Color[data_col$taxonomy %in% unique(Cover_simplified$taxonomy)]) + 
+  theme_ambient()
+
+Total_com_simplified = Front_Simplified + Back_Simplified
+
 # Save
-ggsave(Total_com, file = "Outputs/Figures/Cover/Cover_Transplants_communities.png", width = 20, height = 40, units = "cm", dpi = 300)
+ggsave(Total_com, file = "Outputs/Figures/Cover/Cover_Transplants_communities.png", 
+       width = 20, height = 40, units = "cm", dpi = 300)
+ggsave(Total_com_simplified, file = "Outputs/Figures/Cover/Cover_Transplants_communities_taxon.png", 
+       width = 30, height = 15, units = "cm", dpi = 300)
