@@ -190,7 +190,7 @@ training_data_GPP = cbind(training_data, predict(GPP_model, training_data))
 
 # NH3
 dataset_change_NH3 = dataset_change %>% dplyr::filter(Process == "NH3") %>% 
-  mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(pH != "ELOW" | Time != "T2")
+  mutate(change_std = abs(change_std) + 1e-26) #%>% dplyr::filter(pH != "ELOW" | Time != "T2")
 NH3_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
                  data = dataset_change_NH3, family = weibull(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
@@ -210,13 +210,13 @@ NO2_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +
 bayes_R2(NO2_model) # R2 = 57%
 training_data_NO2 = cbind(training_data, predict(NO2_model, training_data))
 # change back the sign
-training_data_NO2$Estimate = training_data_NO2$Estimate-2
+training_data_NO2$Estimate = -training_data_NO2$Estimate
 (NO2_plot = ggplot(training_data_NO2, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
     geom_point() + scale_y_continuous(limits = c(-15,15)))
 
 # NO3
 dataset_change_NO3 = dataset_change %>% dplyr::filter(Process == "NO3") %>% 
-  mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(pH != "AMB" | Time != "T3")
+  mutate(change_std = abs(change_std) + 1e-26) #%>% dplyr::filter(pH != "AMB" | Time != "T3")
 NO3_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
                  data = dataset_change_NO3, family = weibull(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
@@ -446,7 +446,6 @@ GPP_Process$ribbon_pos[GPP_Process$ribbon_pos >= 5] = 5
           strip.background = element_blank(),
           legend.position  = "bottom"))
 
-
 ###### Panel 3 ----
 ### NH4 ---
 process = "NH3"
@@ -465,15 +464,15 @@ T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in d
 # Convert values to be on the same scale
 NH4_Process <- data_model %>% dplyr::filter(Function %in% c("NH3")) %>% 
   mutate(ribbon_neg = Estimate - Est.Error,
-         ribbon_pos = ribbon_neg + 1.7*Est.Error) %>%
+         ribbon_pos = ribbon_neg + 1.4*Est.Error) %>%
   mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
-                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
-                            Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
-                            Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
+                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/min(T0$mean_T0),
+                            Communities == "Mixed" ~ . * T0$mean_T0[1]/min(T0$mean_T0),
+                            Communities == "encrusting" ~ . * T0$mean_T0[2]/min(T0$mean_T0),
                             TRUE ~ .)))
 
 # ELOW CI upper part()
-NH4_Process_CI = NH4_Process %>% dplyr::filter(pH == "ELOW", nb_days < 60) %>% 
+NH4_Process_CI = NH4_Process %>% dplyr::filter(pH == "ELOW", nb_days < 50) %>% 
   group_by(Communities) %>% group_split()
 CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[1]]), 
                   NH4_Process %>% dplyr::filter(pH == "ELOW", Communities == "Mixed")) %>% as.numeric()
@@ -486,6 +485,62 @@ NH4_Process$ribbon_pos[NH4_Process$pH == "ELOW" & NH4_Process$Communities == "Mi
 NH4_Process$ribbon_pos[NH4_Process$pH == "ELOW" & NH4_Process$Communities == "forest"] = CI_UP_2
 NH4_Process$ribbon_pos[NH4_Process$pH == "ELOW" & NH4_Process$Communities == "encrusting"] = CI_UP_3
 
+# LOW CI upper part()
+NH4_Process_CI = NH4_Process %>% dplyr::filter(pH == "LOW", nb_days < 60) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[1]]), 
+                  NH4_Process %>% dplyr::filter(pH == "LOW", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[2]]), 
+                  NH4_Process %>% dplyr::filter(pH == "LOW", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[3]]), 
+                  NH4_Process %>% dplyr::filter(pH == "LOW", Communities == "encrusting")) %>% as.numeric()
+
+NH4_Process$ribbon_pos[NH4_Process$pH == "LOW" & NH4_Process$Communities == "Mixed"] = CI_UP_1
+NH4_Process$ribbon_pos[NH4_Process$pH == "LOW" & NH4_Process$Communities == "forest"] = CI_UP_2
+NH4_Process$ribbon_pos[NH4_Process$pH == "LOW" & NH4_Process$Communities == "encrusting"] = CI_UP_3
+
+# LOW CI below part()
+NH4_Process_CI = NH4_Process %>% dplyr::filter(pH == "LOW", nb_days < 100) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NH4_Process_CI[[1]]), 
+                  NH4_Process %>% dplyr::filter(pH == "LOW", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NH4_Process_CI[[2]]), 
+                  NH4_Process %>% dplyr::filter(pH == "LOW", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NH4_Process_CI[[3]]), 
+                  NH4_Process %>% dplyr::filter(pH == "LOW", Communities == "encrusting")) %>% as.numeric()
+
+NH4_Process$ribbon_neg[NH4_Process$pH == "LOW" & NH4_Process$Communities == "Mixed"] = CI_UP_1
+NH4_Process$ribbon_neg[NH4_Process$pH == "LOW" & NH4_Process$Communities == "forest"] = CI_UP_2
+NH4_Process$ribbon_neg[NH4_Process$pH == "LOW" & NH4_Process$Communities == "encrusting"] = CI_UP_3
+
+# AMB CI upper part()
+NH4_Process_CI = NH4_Process %>% dplyr::filter(pH == "AMB", nb_days < 60) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[1]]), 
+                  NH4_Process %>% dplyr::filter(pH == "AMB", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[2]]), 
+                  NH4_Process %>% dplyr::filter(pH == "AMB", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NH4_Process_CI[[3]]), 
+                  NH4_Process %>% dplyr::filter(pH == "AMB", Communities == "encrusting")) %>% as.numeric()
+
+NH4_Process$ribbon_pos[NH4_Process$pH == "AMB" & NH4_Process$Communities == "Mixed"] = CI_UP_1
+NH4_Process$ribbon_pos[NH4_Process$pH == "AMB" & NH4_Process$Communities == "forest"] = CI_UP_2
+NH4_Process$ribbon_pos[NH4_Process$pH == "AMB" & NH4_Process$Communities == "encrusting"] = CI_UP_3
+
+# AMB CI below part()
+NH4_Process_CI = NH4_Process %>% dplyr::filter(pH == "AMB", nb_days < 60) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NH4_Process_CI[[1]]), 
+                  NH4_Process %>% dplyr::filter(pH == "AMB", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NH4_Process_CI[[2]]), 
+                  NH4_Process %>% dplyr::filter(pH == "AMB", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NH4_Process_CI[[3]]), 
+                  NH4_Process %>% dplyr::filter(pH == "AMB", Communities == "encrusting")) %>% as.numeric()
+
+NH4_Process$ribbon_neg[NH4_Process$pH == "AMB" & NH4_Process$Communities == "Mixed"] = CI_UP_1
+NH4_Process$ribbon_neg[NH4_Process$pH == "AMB" & NH4_Process$Communities == "forest"] = CI_UP_2
+NH4_Process$ribbon_neg[NH4_Process$pH == "AMB" & NH4_Process$Communities == "encrusting"] = CI_UP_3
+
 # Crop ribbon polygon
 NH4_Process$ribbon_neg[NH4_Process$ribbon_neg <= -5] = -5
 NH4_Process$ribbon_pos[NH4_Process$ribbon_pos <= -5] = -5
@@ -494,7 +549,8 @@ NH4_Process$ribbon_pos[NH4_Process$ribbon_pos >= 5] = 5
 
 # Figure Panel 3A
 (Panel_3_NH4 <- NH4_Process %>% dplyr::filter(ribbon_pos > -5) %>% 
-    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
+    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting")),
+           pH = fct_relevel(pH, c("ELOW", "AMB", "LOW"))) %>%  
     ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
     geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
     geom_point(size = 1) + 
@@ -531,15 +587,15 @@ T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in d
 # Convert values to be on the same scale
 NO3_Process <- data_model %>% dplyr::filter(Function %in% c("NO3")) %>% 
   mutate(ribbon_neg = Estimate - Est.Error,
-         ribbon_pos = Estimate + Est.Error) %>% 
+         ribbon_pos = ribbon_neg + 1.4*Est.Error) %>% 
   mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
-                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
-                            Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
-                            Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
+                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/min(T0$mean_T0),
+                            Communities == "Mixed" ~ . * T0$mean_T0[1]/min(T0$mean_T0),
+                            Communities == "encrusting" ~ . * T0$mean_T0[2]/min(T0$mean_T0),
                             T ~ .)))
 
 # ELOW CI upper part()
-NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "ELOW", nb_days < 80) %>% 
+NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "ELOW", nb_days < 50) %>% 
   group_by(Communities) %>% group_split()
 CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[1]]), 
                   NO3_Process %>% dplyr::filter(pH == "ELOW", Communities == "Mixed")) %>% as.numeric()
@@ -552,8 +608,36 @@ NO3_Process$ribbon_pos[NO3_Process$pH == "ELOW" & NO3_Process$Communities == "Mi
 NO3_Process$ribbon_pos[NO3_Process$pH == "ELOW" & NO3_Process$Communities == "forest"] = CI_UP_2
 NO3_Process$ribbon_pos[NO3_Process$pH == "ELOW" & NO3_Process$Communities == "encrusting"] = CI_UP_3
 
+# LOW CI upper part()
+NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "LOW", nb_days < 60) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[1]]), 
+                  NO3_Process %>% dplyr::filter(pH == "LOW", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[2]]), 
+                  NO3_Process %>% dplyr::filter(pH == "LOW", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[3]]), 
+                  NO3_Process %>% dplyr::filter(pH == "LOW", Communities == "encrusting")) %>% as.numeric()
+
+NO3_Process$ribbon_pos[NO3_Process$pH == "LOW" & NO3_Process$Communities == "Mixed"] = CI_UP_1
+NO3_Process$ribbon_pos[NO3_Process$pH == "LOW" & NO3_Process$Communities == "forest"] = CI_UP_2
+NO3_Process$ribbon_pos[NO3_Process$pH == "LOW" & NO3_Process$Communities == "encrusting"] = CI_UP_3
+
+# LOW CI below part()
+NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "LOW", nb_days < 60) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NO3_Process_CI[[1]]), 
+                  NO3_Process %>% dplyr::filter(pH == "LOW", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NO3_Process_CI[[2]]), 
+                  NO3_Process %>% dplyr::filter(pH == "LOW", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NO3_Process_CI[[3]]), 
+                  NO3_Process %>% dplyr::filter(pH == "LOW", Communities == "encrusting")) %>% as.numeric()
+
+NO3_Process$ribbon_neg[NO3_Process$pH == "LOW" & NO3_Process$Communities == "Mixed"] = CI_UP_1
+NO3_Process$ribbon_neg[NO3_Process$pH == "LOW" & NO3_Process$Communities == "forest"] = CI_UP_2
+NO3_Process$ribbon_neg[NO3_Process$pH == "LOW" & NO3_Process$Communities == "encrusting"] = CI_UP_3
+
 # AMB CI upper part()
-NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "AMB") %>% 
+NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "AMB", nb_days < 60) %>% 
   group_by(Communities) %>% group_split()
 CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = NO3_Process_CI[[1]]), 
                   NO3_Process %>% dplyr::filter(pH == "AMB", Communities == "Mixed")) %>% as.numeric()
@@ -566,8 +650,8 @@ NO3_Process$ribbon_pos[NO3_Process$pH == "AMB" & NO3_Process$Communities == "Mix
 NO3_Process$ribbon_pos[NO3_Process$pH == "AMB" & NO3_Process$Communities == "forest"] = CI_UP_2
 NO3_Process$ribbon_pos[NO3_Process$pH == "AMB" & NO3_Process$Communities == "encrusting"] = CI_UP_3
 
-# AMB CI lower part()
-NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "AMB") %>% 
+# AMB CI below part()
+NO3_Process_CI = NO3_Process %>% dplyr::filter(pH == "AMB", nb_days < 60) %>% 
   group_by(Communities) %>% group_split()
 CI_UP_1 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = NO3_Process_CI[[1]]), 
                   NO3_Process %>% dplyr::filter(pH == "AMB", Communities == "Mixed")) %>% as.numeric()
@@ -588,7 +672,8 @@ NO3_Process$ribbon_pos[NO3_Process$ribbon_pos >= 5] = 5
 
 # Figure Panel 3B
 (Panel_3_NO3 <- NO3_Process %>% dplyr::filter(ribbon_pos > -5) %>% 
-    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting"))) %>% 
+    mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting")),
+           pH = fct_relevel(pH, c("ELOW", "AMB", "LOW"))) %>%  
     ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
     geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5) +
     geom_point(size = 1) + 
@@ -625,12 +710,82 @@ T0 %>% full_join(T3) %>% mutate(ratio = mean_T3/mean_T0) # Check the ratios in d
 # Convert values to be on the same scale
 PO4_Process <- data_model %>% dplyr::filter(Function %in% c("PO4")) %>% 
   mutate(ribbon_neg = Estimate - Est.Error,
-         ribbon_pos = ribbon_neg + 1.7*Est.Error) %>% 
+         ribbon_pos = ribbon_neg + 1.4*Est.Error) %>% 
   mutate(across(c(Estimate, ribbon_neg, ribbon_pos),
-                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/max(T0$mean_T0),
-                            Communities == "Mixed" ~ . * T0$mean_T0[1]/max(T0$mean_T0),
-                            Communities == "encrusting" ~ . * T0$mean_T0[2]/max(T0$mean_T0),
+                ~ case_when(Communities == "forest" ~ . * T0$mean_T0[3]/min(T0$mean_T0),
+                            Communities == "Mixed" ~ . * T0$mean_T0[1]/min(T0$mean_T0),
+                            Communities == "encrusting" ~ . * T0$mean_T0[2]/min(T0$mean_T0),
                             T ~ .)))
+
+# ELOW CI upper part()
+PO4_Process_CI = PO4_Process %>% dplyr::filter(pH == "ELOW", nb_days < 50) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = PO4_Process_CI[[1]]), 
+                  PO4_Process %>% dplyr::filter(pH == "ELOW", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = PO4_Process_CI[[2]]), 
+                  PO4_Process %>% dplyr::filter(pH == "ELOW", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = PO4_Process_CI[[3]]), 
+                  PO4_Process %>% dplyr::filter(pH == "ELOW", Communities == "encrusting")) %>% as.numeric()
+
+PO4_Process$ribbon_pos[PO4_Process$pH == "ELOW" & PO4_Process$Communities == "Mixed"] = CI_UP_1
+PO4_Process$ribbon_pos[PO4_Process$pH == "ELOW" & PO4_Process$Communities == "forest"] = CI_UP_2
+PO4_Process$ribbon_pos[PO4_Process$pH == "ELOW" & PO4_Process$Communities == "encrusting"] = CI_UP_3
+
+# LOW CI upper part()
+PO4_Process_CI = PO4_Process %>% dplyr::filter(pH == "LOW", nb_days < 60) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = PO4_Process_CI[[1]]), 
+                  PO4_Process %>% dplyr::filter(pH == "LOW", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = PO4_Process_CI[[2]]), 
+                  PO4_Process %>% dplyr::filter(pH == "LOW", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = PO4_Process_CI[[3]]), 
+                  PO4_Process %>% dplyr::filter(pH == "LOW", Communities == "encrusting")) %>% as.numeric()
+
+PO4_Process$ribbon_pos[PO4_Process$pH == "LOW" & PO4_Process$Communities == "Mixed"] = CI_UP_1
+PO4_Process$ribbon_pos[PO4_Process$pH == "LOW" & PO4_Process$Communities == "forest"] = CI_UP_2
+PO4_Process$ribbon_pos[PO4_Process$pH == "LOW" & PO4_Process$Communities == "encrusting"] = CI_UP_3
+
+# LOW CI below part()
+PO4_Process_CI = PO4_Process %>% dplyr::filter(pH == "LOW", nb_days < 60) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = PO4_Process_CI[[1]]), 
+                  PO4_Process %>% dplyr::filter(pH == "LOW", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = PO4_Process_CI[[2]]), 
+                  PO4_Process %>% dplyr::filter(pH == "LOW", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = PO4_Process_CI[[3]]), 
+                  PO4_Process %>% dplyr::filter(pH == "LOW", Communities == "encrusting")) %>% as.numeric()
+
+PO4_Process$ribbon_neg[PO4_Process$pH == "LOW" & PO4_Process$Communities == "Mixed"] = CI_UP_1
+PO4_Process$ribbon_neg[PO4_Process$pH == "LOW" & PO4_Process$Communities == "forest"] = CI_UP_2
+PO4_Process$ribbon_neg[PO4_Process$pH == "LOW" & PO4_Process$Communities == "encrusting"] = CI_UP_3
+
+# AMB CI upper part()
+PO4_Process_CI = PO4_Process %>% dplyr::filter(pH == "AMB", nb_days < 60) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = PO4_Process_CI[[1]]), 
+                  PO4_Process %>% dplyr::filter(pH == "AMB", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = PO4_Process_CI[[2]]), 
+                  PO4_Process %>% dplyr::filter(pH == "AMB", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_pos ~ s(nb_days), data = PO4_Process_CI[[3]]), 
+                  PO4_Process %>% dplyr::filter(pH == "AMB", Communities == "encrusting")) %>% as.numeric()
+
+PO4_Process$ribbon_pos[PO4_Process$pH == "AMB" & PO4_Process$Communities == "Mixed"] = CI_UP_1
+PO4_Process$ribbon_pos[PO4_Process$pH == "AMB" & PO4_Process$Communities == "forest"] = CI_UP_2
+PO4_Process$ribbon_pos[PO4_Process$pH == "AMB" & PO4_Process$Communities == "encrusting"] = CI_UP_3
+
+# AMB CI below part()
+PO4_Process_CI = PO4_Process %>% dplyr::filter(pH == "AMB", nb_days < 60) %>% 
+  group_by(Communities) %>% group_split()
+CI_UP_1 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = PO4_Process_CI[[1]]), 
+                  PO4_Process %>% dplyr::filter(pH == "AMB", Communities == "Mixed")) %>% as.numeric()
+CI_UP_2 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = PO4_Process_CI[[2]]), 
+                  PO4_Process %>% dplyr::filter(pH == "AMB", Communities == "forest")) %>% as.numeric()
+CI_UP_3 = predict(mgcv::gam(ribbon_neg ~ s(nb_days), data = PO4_Process_CI[[3]]), 
+                  PO4_Process %>% dplyr::filter(pH == "AMB", Communities == "encrusting")) %>% as.numeric()
+
+PO4_Process$ribbon_neg[PO4_Process$pH == "AMB" & PO4_Process$Communities == "Mixed"] = CI_UP_1
+PO4_Process$ribbon_neg[PO4_Process$pH == "AMB" & PO4_Process$Communities == "forest"] = CI_UP_2
+PO4_Process$ribbon_neg[PO4_Process$pH == "AMB" & PO4_Process$Communities == "encrusting"] = CI_UP_3
 
 # Crop ribbon polygon
 PO4_Process$ribbon_neg[PO4_Process$ribbon_neg <= -5] = -5
@@ -642,7 +797,7 @@ PO4_Process$ribbon_pos[PO4_Process$ribbon_pos >= 5] = 5
 (Panel_3_PO4 <- PO4_Process %>% dplyr::filter(ribbon_neg < 5 | pH %notin% c("LOW", "AMB"),
                                               ribbon_pos > -5 | pH %notin% c("ELOW")) %>% 
     mutate(Communities = fct_relevel(Communities, c("forest", "Mixed", "encrusting")),
-           pH = fct_relevel(pH, c("AMB", "LOW", "ELOW"))) %>% 
+           pH = fct_relevel(pH, c("ELOW", "AMB", "LOW"))) %>% 
     ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
     geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos, fill = pH), alpha = .5, show.legend = F) +
     geom_point(size = 1, show.legend = F) + 
@@ -670,3 +825,4 @@ Functions_Communities <- Panel_1_CR + plot_spacer() + Panel_2_DR + Panel_2_GPP +
 
 ggsave(Functions_Communities, file = "Outputs/Figures/Processes_Panels/Functions_3.png", width = 42, 
        height = 16, units = "cm", dpi = 300)
+

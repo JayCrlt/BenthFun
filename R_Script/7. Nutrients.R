@@ -40,8 +40,8 @@ for (j in 1:12) {
     mutate(Sample = case_when(row_number() == 1 ~ "Blank", row_number() == 2 ~ "Blank", TRUE ~ as.character(Sample))) %>%
     group_by(Experiment, Phase, pH, Sample) %>% summarise_all(c(mean))
   Transplants_nut[[j]] <- rbind(T0, Transplants_nut[[j]][3:8,], Blank)
-  for (i in 1:7) {Transplants_nut[[j]][i+1,5:9] = Transplants_nut[[j]][1,5:9] - Transplants_nut[[j]][i+1, 5:9] - 
-    Transplants_nut[[j]][8, 5:9]} # initial - final - blank_correction
+  for (i in 1:7) {Transplants_nut[[j]][i+1,5:9] = Transplants_nut[[j]][i+1,5:9] - Transplants_nut[[j]][1, 5:9] - 
+    Transplants_nut[[j]][8, 5:9]} # final - initial - blank_correction
   Transplants_nut[[j]] <- Transplants_nut[[j]][2:7,]}
 
 Transplants_nut = Transplants_nut %>% bind_rows()
@@ -49,7 +49,7 @@ Transplants_nut = Transplants_nut %>% bind_rows()
 NH3 <- Transplants_nut %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% dplyr::filter(Experiment != "PI Curves") %>% 
   ggplot(., aes(y = `NH3 (mmol m-3)`, fill = pH, x = Phase)) + 
   geom_boxplot(outliers = FALSE) +
-  #geom_jitter(shape= 21, width = .2, size = 2, alpha = .8) +
+  geom_jitter(shape= 21, width = .2, size = 2, alpha = .8) +
   theme_classic() +
   scale_fill_manual(values = c("firebrick2", "gold", "royalblue3"))
 PO4 <- Transplants_nut %>% mutate(pH = factor(pH, levels = c("ELOW", "LOW", "AMB"))) %>% dplyr::filter(Experiment != "PI Curves") %>% 
