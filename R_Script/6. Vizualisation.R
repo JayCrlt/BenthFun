@@ -1,9 +1,19 @@
-rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
+rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(ggridges)
+`%notin%` = Negate(`%in%`)
 
-# Load previous scripts
+# Load previous scripts and dataset
+## Data supplementary 
 source("R_Script/3. Alkalinity.R")
 source("R_Script/2. MiniDots.R")
 
+## Data Figure 1
+pH_Long_term <- xlsx::read.xlsx("Data/5. Environmental Long term/pH/pH_Long_term.xlsx", sheetName = "Sheet1") %>% 
+  mutate(DateTime = as.POSIXct(DateTime, format = "%m/%d/%Y %H:%M:%S"),
+         across(c(pH, Temperature), as.numeric))
+mean_pH <- data.frame(pH = c(6.438064, 7.6959125, 8.0215523), Site = c("Extreme low", "Low", "Ambient")) %>% 
+  mutate(Site = factor(Site, levels = c("Extreme low", "Low", "Ambient"))) 
+
+#### Supplementary ---
 # Merging both datasets
 Alkalinity_dataset_cond <- Alkalinity_dataset_cond %>% 
   dplyr::select(., c(`Tile_N°`, Process, calcification_rate, calcifcation_rate_sd, `Stage experiment`, `pH condition`)) %>% 
@@ -140,7 +150,29 @@ Summary <- Summary %>% mutate(Tile = convert_tile(Tile)) %>%
                                    "low pH conditions" = "LOW",
                                    "ambient pH conditions" = "AMB"))
 
+### Figure 1 ---
+
+(Figure_1 = pH_Long_term %>% 
+    mutate(Site = fct_recode(Site, "Extreme low" = "extreme_low", "Low" = "low", "Ambient" = "amb")) %>% 
+    mutate(Site = factor(Site, levels = c("Ambient", "Low", "Extreme low"))) %>%
+    ggplot(aes(x = pH, y = Site)) +
+    geom_density_ridges(alpha=0.6, bandwidth=0.05, aes(fill = Site, color = Site), linewidth = 1) +
+    geom_point(data = mean_pH, aes(x = pH, y = Site, fill = Site), shape = 21, color = "black", size = 4, show.legend = F) +
+    scale_x_continuous(breaks = seq(5.5,8.5,0.5), limits = c(5.75,8.25), name = expression(pH[T])) +
+    scale_color_manual(values=c("royalblue3", "goldenrod1", "firebrick2"), labels = c("Extreme low", "Low", "Ambient")) +
+    scale_fill_manual(values=c("royalblue3", "goldenrod1", "firebrick2"), labels = c("Extreme low", "Low", "Ambient")) +
+    theme_classic() + 
+    theme(axis.text        = element_text(size = 14),
+          axis.title       = element_text(size = 16),
+          legend.text      = element_text(size = 14),
+          legend.title     = element_blank(),
+          panel.border     = element_rect(color = "black", fill = NA, size = 1),
+          strip.text       = element_blank(), 
+          strip.background = element_blank(),
+          legend.position  = "bottom"))
+
 # Exporting important informations
 xlsx::write.xlsx(Summary %>% as.data.frame(), "Outputs/Summary/Summary_Process_BenthFun.xlsx", row.names = FALSE)
 ggsave(Process_Transplants, filename = "Process_Transplants_Total.png", path = "Outputs/Figures/Processes_Panels", device = "png", width = 12, height = 10) 
 ggsave(Process_Historic, filename = "Process_Historic_Total", path = "Outputs/Figures/Processes_Panels", device = "png", width = 7.5, height = 10) 
+ggsave(Figure_1, file = "Outputs/Figures/pH_Context/Figure_1.png",  width = 15, height = 15, units = "cm", dpi = 300)
