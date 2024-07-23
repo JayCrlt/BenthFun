@@ -1,5 +1,5 @@
 ### Changes over time due to pH change
-rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl) ; library(brms)
+options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl) ; library(brms)
 `%notin%` = Negate(`%in%`)
 
 # Load data
@@ -823,6 +823,9 @@ Functions_Communities <- Panel_1_CR + plot_spacer() + Panel_2_DR + Panel_2_GPP +
   Panel_3_NH4 + Panel_3_NO3 + Panel_3_PO4 + plot_layout(nrow = 1, widths = c(3,1,3,3,1,3,3,3), guides = "collect") &
   theme(legend.position = "bottom")
 
+### Save dataset
+Transplants_Changes_Summary <- rbind(CR_Process, DR_Process, GPP_Process, NH4_Process, NO3_Process, PO4_Process)
+# openxlsx::write.xlsx(Transplants_Changes_Summary, file = "Outputs/Summary/Transplants_Changes_model.xlsx", rowNames = FALSE)
+
 ggsave(Functions_Communities, file = "Outputs/Figures/Processes_Panels/Functions_3.png", width = 42, 
        height = 16, units = "cm", dpi = 300)
-

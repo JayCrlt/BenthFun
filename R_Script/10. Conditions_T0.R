@@ -1,4 +1,4 @@
-options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl)
+options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(readxl) ; library(seacarb)
 
 ## Datasets
 source("R_Script/3. Alkalinity.R")
@@ -16,6 +16,10 @@ Tile_concerned <- read_excel("Data/1. Diving log/Diving_log_BenthFun.xlsx",
   dplyr::filter(is.na(`Tile_N°`)) %>% dplyr::select(c(Diving_Date, Label, `Tile_N°`, Start_incubation, Stop_Alkalinity, Temperature, pH_mV))
 
 Nutrients <- read_excel("Data/6. Nutrients/Nutrients.xlsx", sheet = "Sheet1") %>% select(-c(`DATA ANALYSIS`, Package))
+
+############# Those are the results from this script – Used line 60
+T0_Tot  <- read_excel("Data/8. Initial_Conditions/T0_Env.xlsx")
+T0_Long <- read_excel("Data/5. Environmental Long term/pH/pH_Long_term.xlsx")
 
 ## Reformatage
 label_decomposition <- str_split(Tile_concerned$Label, fixed("_"))
@@ -52,3 +56,53 @@ T0 = Alk_T0 %>% left_join(Nutrients, by = c("Label", "pH.condition", "Stage.expe
          PO4_mmol.m3, NO2_mmol.m3, NO3_mmol.m3, Temperature, pH_mV)
 
 #xlsx::write.xlsx(T0, file = "Data/8. Initial_Conditions/T0_Env.xlsx", row.names = FALSE)
+
+##### Post analyse with Carbonates
+T0_Long_filtered_set_1 <- T0_Tot %>% dplyr::filter(Experimental_set == "Set_1") %>% 
+  mutate(`Starting_time_GMT+1` = as.POSIXct(paste(Sampling_Date, `Starting_time_GMT+1`), format="%Y-%m-%d %H:%M:%S")) %>% 
+  rowwise() %>% do({
+    start_time <- .$`Starting_time_GMT+1`
+    end_time   <- start_time + 3600
+    data.frame(Sampling_Date = .$Sampling_Date,
+               T0_Long %>% filter(DateTime >= start_time & DateTime <= end_time))}) %>% ungroup() %>% drop_na() %>% 
+  group_by(Sampling_Date, Site) %>% summarise(pH = mean(pH), Temperature = mean(Temperature)) %>% 
+  rename("pH_condition" = "Site") %>% 
+  mutate(pH_condition = recode(pH_condition, "extreme_low" = "ELOW", "low" = "LOW", "amb" = "AMB"), Experimental_set = "Set_1") 
+
+T0_Long_filtered_set_2 <- T0_Tot %>% dplyr::filter(Experimental_set == "Set_2") %>% 
+  mutate(`Starting_time_GMT+1` = as.POSIXct(paste(Sampling_Date, `Starting_time_GMT+1`), format="%Y-%m-%d %H:%M:%S")) %>% 
+  rowwise() %>% do({
+    start_time <- .$`Starting_time_GMT+1`
+    end_time   <- start_time + 3600
+    data.frame(Sampling_Date = .$Sampling_Date,
+               T0_Long %>% filter(DateTime >= start_time & DateTime <= end_time))}) %>% ungroup() %>% drop_na() %>% 
+  group_by(Sampling_Date, Site) %>% summarise(pH = mean(pH), Temperature = mean(Temperature)) %>% 
+  rename("pH_condition" = "Site") %>% 
+  mutate(pH_condition = recode(pH_condition, "extreme_low" = "ELOW", "low" = "LOW", "amb" = "AMB"), Experimental_set = "Set_2") 
+
+T0_Long_filtered <- rbind(T0_Long_filtered_set_1, T0_Long_filtered_set_2)
+
+# Merge filtered T0_Long with T0_Tot
+T0_Tot_merged <- T0_Tot %>% select(-c("Temperature", "pH_mV")) %>% 
+  left_join(T0_Long_filtered, by = c("Sampling_Date", "pH_condition", "Experimental_set"))
+
+# Calculate carbonate parameters
+carb_results <- carb(flag = 8, var1 = T0_Tot_merged$pH, var2 = T0_Tot_merged$Alk_mean/1e6, 
+                     S = 35, T = T0_Tot_merged$Temperature, P = 0)
+
+# Add the results to the original dataset
+T0_Tot_merged <- T0_Tot_merged %>% 
+  bind_cols(carb_results %>%
+  rename(CT = DIC, pHT = pH, pCO2 = pCO2, Ωc = OmegaCalcite, Ωa = OmegaAragonite) %>% 
+    select(CT, pHT, pCO2, Ωc, Ωa)) %>% mutate(CT = CT * 1e6) %>% select(-pH)
+
+# Define the numerical columns to be summarized
+num_columns <- c("Alk_mean", "Alk_sd", "NH3_mmol.m3", "PO4_mmol.m3", "NO2_mmol.m3", 
+                 "NO3_mmol.m3", "Temperature", "CT", "pHT", "pCO2", "Ωc", "Ωa")
+
+# Group by the specified columns and calculate mean and sd for each numerical variable
+T0_Tot_summary <- T0_Tot_merged %>%
+  group_by(Sampling_Date, Experiment, Stage_experiment, pH_condition) %>%
+  summarise(across(all_of(num_columns), list(avg = ~ mean(.x, na.rm = TRUE), sd = ~ sd(.x, na.rm = TRUE)), .names = "{.col}_{.fn}"))
+
+#openxlsx::write.xlsx(T0_Tot_summary, file = "Data/8. Initial_Conditions/T0_Env_Carbonates.xlsx", row.names = FALSE)

@@ -963,6 +963,10 @@ Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NO3"
   Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NO3") & Historic_Change_Final$pH != "ELOW"] * 5
 Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NH4") & Historic_Change_Final$pH != "ELOW"] =
   Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NH4") & Historic_Change_Final$pH != "ELOW"] * 2
+Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR")] =
+  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR")] * 0.75
+Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("GPP") & Historic_Change_Final$pH == "ELOW"] =
+  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("GPP") & Historic_Change_Final$pH == "ELOW"] * 1.25
 
 # Colors
 Historic_Change_Final$Color = c("#ffffff", "#ba947b", "#cbae9b", "#90664b", "#704f3a", "#90664b",

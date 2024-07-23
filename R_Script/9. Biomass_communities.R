@@ -278,9 +278,11 @@ training_data <- data.frame(nb_days = seq(0, 130, 0.05))
 predictions <- data.frame(nb_days = rep(training_data$nb_days, 9),
                           pH = factor(rep(rep(c("AMB", "LOW", "ELOW"), each = nrow(training_data)), 3)),
                           Communities = factor(rep(c("forest", "Mixed", "encrusting"), each = nrow(training_data)*3)))
-predictions$Biomass_std <- predict(model_smooth, newdata = predictions, allow_new_levels = TRUE)
+predictions$Biomass_std <- predict(model_perf, newdata = predictions, allow_new_levels = TRUE)
 # Performance
 bayes_R2(model_perf)
+#openxlsx::write.xlsx(predictions, file = "Outputs/Summary/biomass_change_model.xlsx", rowNames = FALSE)
+#openxlsx::write.xlsx(Cover_biomass, file = "Outputs/Summary/Cover_biomass.xlsx", rowNames = FALSE)
 
 ggsave(Figure_2, file = "Outputs/Figures/Biomass/Biomass_changes_communities.png", width = 30, 
        height = 9, units = "cm", dpi = 300)
