@@ -412,6 +412,38 @@ Back_Simplified = Cover_simplified %>% dplyr::filter(Tile_side == "Back") %>%
 
 Total_com_simplified = Front_Simplified + Back_Simplified
 
+### Quick statistics
+# Tile_cover_front = Tile_cover ### up to line 134
+# Tile_cover_back = Tile_cover  ### up to line 260
+# Tile_cover = rbind(Tile_cover_front %>% dplyr::select(-n), Tile_cover_back)
+nb_species = Tile_cover %>% 
+  mutate(Comm = case_when(Tile %in% mixtes ~ "Mixed",
+                          Tile %in% encrus ~ "Encrusting",
+                          TRUE ~ "Forest")) %>% 
+  dplyr::filter(Species != "non-alive", Cover != 0) %>% 
+  group_by(Tile, Time, pH, Comm, Species) %>% summarise(Cover = mean(Cover)) %>% 
+  group_by(Tile, Time, pH, Comm) %>% summarise(n_species = n()) %>% 
+  group_by(Time, pH, Comm) %>% summarise(n_species_avg = mean(n_species), n_species_sd = sd(n_species))
+
+nb_species_amb <- nb_species %>% dplyr::filter(pH == "AMB")
+nb_species_low <- nb_species %>% dplyr::filter(pH == "LOW")
+nb_species_elow <- nb_species %>% dplyr::filter(pH == "ELOW")
+#AMB:   20.5 ± 3.5 CALC (T0) & 24.0 ± 2.8 FLESH (T0) vs 16.5 ± 2.1 CALC (T3) & 17.5 ± 3.5 FLESH (T3)
+#LOW:   22.0 ± 0.0 FLESH (T0) & 22.5 ± 0.7 CALC (T0) vs 15.5 ± 2.1 CALC (T3) & 15.5 ± 0.7 FLESH (T3)
+#ELOW: 18.0 ± 0.0 CALC (T0) & 20.5 ± 3.5 FLESH (T0) vs 03.0 ± 0.0 FLESH (T3) & 04.0 ± 1.4 CALC (T3)
+
+data.frame(
+  pH = c("AMB", "AMB", "LOW", "LOW", "ELOW", "ELOW"),
+  Comm = c("CALC", "FLESH", "CALC", "FLESH", "CALC", "FLESH"),
+  T0_mean = c(20.5, 24.0, 22.5, 22.0, 18.0, 20.5),
+  T0_sd = c(3.5, 2.8, 0.7, 0.0, 0.0, 3.5),
+  T3_mean = c(16.5, 17.5, 15.5, 15.5, 4.0, 3.0),
+  T3_sd = c(2.1, 3.5, 2.1, 0.7, 1.4, 0.0)) %>%
+  mutate(diff_mean = T3_mean - T0_mean,
+         diff_sd = sqrt(T3_sd^2 + T0_sd^2)) %>%
+  select(pH, Comm, diff_mean, diff_sd)
+# 4.0 ± 4.1, 7.0 ± 2.2 and 14.0 ± 1.4 (CALC) vs 6.5 ± 4.5, 6.5 ± 0.7 and 17.5 ± 3.5 (FLESH)
+
 # Save
 ggsave(Total_com, file = "Outputs/Figures/Cover/Cover_Transplants_communities.png", 
        width = 20, height = 40, units = "cm", dpi = 300)
