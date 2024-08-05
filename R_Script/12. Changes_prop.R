@@ -311,5 +311,6 @@ PO4_prop = change_prop %>% dplyr::filter(Function == "PO4") %>%
         legend.position = "bottom")
 
 Figure_3B = CR_prop + DR_prop + GPP_prop + NH4_prop + NO3_prop + PO4_prop + plot_layout(ncol = 6)
-ggsave(Functions_Communities, file = "Outputs/Figures/Processes_Panels/Functions_3.png", width = 42, 
-       height = 16, units = "cm", dpi = 300)
+
+ggsave(Figure_3B, file = "Outputs/Figures/Processes_Panels/Figure_3B.png", width = 42, 
+       height = 7, units = "cm", dpi = 300)

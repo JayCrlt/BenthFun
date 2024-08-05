@@ -54,16 +54,16 @@ dataset_change$pH[dataset_change$pH == "ambient pH conditions"] = "AMB"
 
 # Std with biomass
 dataset_change_cal <- dataset_change %>% dplyr::filter(Process == "calcifcation rate") %>% 
-  left_join(Biomass %>% dplyr::select(-c(Biomass_overall, Biomass_npp, Biomass_fil, 
-                                         Biomass_std_overall, Biomass_std_cal, Biomass_std_npp, Biomass_std_fil)),
+  left_join(Biomass %>% dplyr::select(-c(Biomass_overall, Biomass_npp, 
+                                         Biomass_std_overall, Biomass_std_cal, Biomass_std_npp)),
             by = c("Tile", "pH", "Time")) %>% mutate(output_std = output / Biomass_cal) %>% select(-Biomass_cal)
 dataset_change_npp <- dataset_change %>% dplyr::filter(Process == "gross photosynthesis rate") %>% 
-  left_join(Biomass %>% dplyr::select(-c(Biomass_overall, Biomass_cal, Biomass_fil, 
-                                         Biomass_std_overall, Biomass_std_cal, Biomass_std_npp, Biomass_std_fil)),
+  left_join(Biomass %>% dplyr::select(-c(Biomass_overall, Biomass_cal, 
+                                         Biomass_std_overall, Biomass_std_cal, Biomass_std_npp)),
             by = c("Tile", "pH", "Time")) %>% mutate(output_std = output / Biomass_npp) %>% select(-Biomass_npp)
 dataset_change_tot <- dataset_change %>% dplyr::filter(Process %notin% c("calcifcation rate", "gross photosynthesis rate")) %>% 
-  left_join(Biomass %>% dplyr::select(-c(Biomass_cal, Biomass_npp, Biomass_fil, 
-                                         Biomass_std_overall, Biomass_std_cal, Biomass_std_npp, Biomass_std_fil)),
+  left_join(Biomass %>% dplyr::select(-c(Biomass_cal, Biomass_npp, 
+                                         Biomass_std_overall, Biomass_std_cal, Biomass_std_npp)),
             by = c("Tile", "pH", "Time")) %>% mutate(output_std = output / Biomass_overall) %>% select(-Biomass_overall)
 
 ##### PAR CORRECTION ----
@@ -201,19 +201,6 @@ training_data_NH3$Estimate = -training_data_NH3$Estimate
 (NH3_plot = ggplot(training_data_NH3, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
     geom_point() + scale_y_continuous(limits = c(-15,15)))
 
-# NO2
-dataset_change_NO2 = dataset_change %>% dplyr::filter(Process == "NO2") %>% 
-  mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(pH != "ELOW" | Time != "T2")
-NO2_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
-                 data = dataset_change_NO2, family = weibull(), cores = 4, chains = 4, iter = 10000,
-                 warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(NO2_model) # R2 = 57%
-training_data_NO2 = cbind(training_data, predict(NO2_model, training_data))
-# change back the sign
-training_data_NO2$Estimate = -training_data_NO2$Estimate
-(NO2_plot = ggplot(training_data_NO2, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
-    geom_point() + scale_y_continuous(limits = c(-15,15)))
-
 # NO3
 dataset_change_NO3 = dataset_change %>% dplyr::filter(Process == "NO3") %>% 
   mutate(change_std = abs(change_std) + 1e-26) #%>% dplyr::filter(pH != "AMB" | Time != "T3")
@@ -240,30 +227,16 @@ training_data_PO4$Estimate = -training_data_PO4$Estimate
 (PO4_plot = ggplot(training_data_PO4, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
     geom_point() + scale_y_continuous(limits = c(-25,25)))
 
-# SiO4
-dataset_change_SiO4 = dataset_change %>% dplyr::filter(Process == "SiO4") %>% 
-  mutate(change_std = abs(change_std) + 1e-26) 
-SiO4_model <- brm(change_std ~ (nb_days + 0 | Communities) + (nb_days + 0 | pH) +0, init = "0",
-                  data = dataset_change_SiO4, family = weibull(), cores = 4, chains = 4, iter = 10000,
-                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
-bayes_R2(SiO4_model) # R2 = 45%
-training_data_SiO4 = cbind(training_data, predict(SiO4_model, training_data))
-# change back the sign
-training_data_SiO4$Estimate = -training_data_SiO4$Estimate
-(SiO4_plot = ggplot(training_data_SiO4, aes(y = Estimate, x = nb_days, color = pH, shape = Communities)) + 
-    geom_point() + scale_y_continuous(limits = c(-25,25)))
-
 # Merge everything
-data_model <- rbind(training_data_CR, training_data_DR, training_data_GPP, training_data_NH3, training_data_NO2,
-      training_data_NO3, training_data_PO4, training_data_SiO4) %>% 
+data_model <- rbind(training_data_CR, training_data_DR, training_data_GPP, training_data_NH3, 
+      training_data_NO3, training_data_PO4) %>% 
   mutate(Function = c(rep("CR", 23409), rep("DR", 23409), rep("GPP", 23409), rep("NH3", 23409), 
-                      rep("NO2", 23409), rep("NO3", 23409), rep("PO4", 23409), rep("SiO4", 23409)))
+                      rep("NO3", 23409), rep("PO4", 23409)))
 
 data_model = data_model %>% mutate(ribbon_neg = Estimate - Est.Error,
                                    ribbon_pos = Estimate + Est.Error)
 
 data_model %>% # dplyr::filter(Communities == "Mixed") %>% 
-  dplyr::filter(Function %notin% c("NO2", "SiO4")) %>% 
   ggplot(aes(x = nb_days, y = Estimate, color = pH)) + 
   #geom_ribbon(aes(x = nb_days, y = Estimate, ymin = ribbon_neg, ymax = ribbon_pos)) +
   geom_point(aes(shape = Communities), size = 1) + 
