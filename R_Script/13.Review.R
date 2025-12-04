@@ -111,3 +111,7 @@ stress_text <- paste0("NMDS stress = ", round(nmds$stress, 3))
 permanova_text <- "PERMANOVA: F = 1.698, R² = 0.343, p = 0.022"
 combined_NMDS <- (NMDS_1vs2 + NMDS_2vs3) + plot_layout(guides = "collect") +
   plot_annotation(theme = theme(legend.position = "bottom"), caption = paste(stress_text, "|", permanova_text))
+
+# Output
+# ggsave(combined_NMDS, filename = "Fig_S7_Review.png", 
+# path = "Outputs/Figures/Final_Figures/PNG/", device = "png", width = 8, height = 4.5) 
