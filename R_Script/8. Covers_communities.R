@@ -359,7 +359,7 @@ ELO_merged_enc_plot_2 <- ELO_merged_enc %>%
     (LOW_merged_for_plot + LOW_merged_mix_plot + LOW_merged_enc_plot) /
     (LOW_merged_for_plot_2 + LOW_merged_mix_plot_2 + LOW_merged_enc_plot_2) /
     (ELO_merged_for_plot + ELO_merged_mix_plot + ELO_merged_enc_plot) /
-    (ELO_merged_for_plot_2 + ELO_merged_mix_plot_2 + ELO_merged_enc_plot_2) + plot_layout(guides = "collect", nrow = 6)) & theme(legend.position = "none")
+    (ELO_merged_for_plot_2 + ELO_merged_mix_plot_2 + ELO_merged_enc_plot_2) + plot_layout(guides = "collect", nrow = 6)) #& theme(legend.position = "none")
 
 ### SImplification
 Cover_simplified = 

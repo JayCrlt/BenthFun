@@ -239,7 +239,7 @@ Cover_Hist = Cover_hist %>%
         axis.title       = element_text(size = 16),
         legend.text      = element_text(size = 14))
 
-Cover_historic = Biomass_hist + Cover_Hist & theme(legend.position = "bottom")
+Cover_historic = Biomass_hist + Cover_Hist #& theme(legend.position = "bottom")
 
 #######################################################################################################################
 #######################################################################################################################
@@ -323,7 +323,7 @@ training_data <- expand.grid(nb_days = seq(0,100,.05),
                              Comm = c("Mixed", "Forest", "Encrusting"), pH_value = c(6.438064, 7.6959125, 8.0215523))
 # NH3
 NH3_model_his <- brm(NH3_Change ~ (nb_days + 0 | Comm) + (nb_days + 0 | pH_value) +0, init = "0",
-                 data = Transplants_nut_model, family = weibull(), cores = 4, chains = 4, iter = 10000,
+                 data = Transplants_nut_model, family = gaussian(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
 bayes_R2(NH3_model_his) # R2 = 56%
 training_data_NH3 = cbind(training_data, predict(NH3_model_his, training_data))
@@ -340,7 +340,7 @@ training_data_NH3$Estimate = -training_data_NH3$Estimate
 Transplants_nut_model_NO3 = Transplants_nut_model %>% dplyr::filter(NO3_Change > - 5, `NO3 (mmol m-3)` < 2) %>% 
   mutate(NO3_Change = abs(NO3_Change))
 NO3_model_his <- brm(NO3_Change ~ (nb_days + 0 | Comm) + (nb_days + 0 | pH_value) +0, init = "0",
-                     data = Transplants_nut_model_NO3, family = weibull(), cores = 4, chains = 4, iter = 10000,
+                     data = Transplants_nut_model_NO3, family = gaussian(), cores = 4, chains = 4, iter = 10000,
                      warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
 bayes_R2(NO3_model_his) # R2 = 76%
 training_data_NO3 = cbind(training_data, predict(NO3_model_his, training_data))
@@ -359,7 +359,7 @@ Transplants_nut_model_PO4 = Transplants_nut_model %>% dplyr::filter(PO4_Change >
                                                                     Sample != "Tn_t1_AMB_tile_04") %>% 
   mutate(PO4_Change = abs(PO4_Change))
 PO4_model_his <- brm(PO4_Change ~ (nb_days + 0 | Comm) + (nb_days + 0 | pH_value) +0, init = "0",
-                     data = Transplants_nut_model_PO4, family = weibull(), cores = 4, chains = 4, iter = 10000,
+                     data = Transplants_nut_model_PO4, family = gaussian(), cores = 4, chains = 4, iter = 10000,
                      warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
 bayes_R2(PO4_model_his) # R2 = 41%
 training_data_PO4 = cbind(training_data, predict(PO4_model_his, training_data))
@@ -438,8 +438,10 @@ cste = 3.7 ; Sa = 1
     group_by(pH, Comm) %>% 
     summarise(mean_T0 = mean(`NO3 (mmol m-3)` * cste / Sa)))
 training_data_NO3_values =
-  training_data_NO3_values %>% dplyr::filter(Comm %notin% c("Encrusting", "Mixed") | pH != "ELOW",
-                                           Comm != "Encrusting" | pH != "LOW")
+  training_data_NO3_values %>% mutate(pH_tmp = case_when(pH == "LOW" ~ "AMB", pH == "AMB" ~ "LOW", TRUE ~ pH),
+    pH = factor(pH_tmp, levels = c("ELOW", "LOW", "AMB"))) %>% select(-pH_tmp) %>% 
+    dplyr::filter(Comm %notin% c("Encrusting", "Mixed") | pH != "ELOW", Comm != "Encrusting" | pH != "LOW")
+
 # Estimate
 training_data_NO3_values$Estimate[training_data_NO3_values$pH == "AMB" & training_data_NO3_values$Comm == "Encrusting"] = 
   -training_data_NO3_values$Estimate[training_data_NO3_values$pH == "AMB" & training_data_NO3_values$Comm == "Encrusting"] *
@@ -486,7 +488,7 @@ Nut_NO3 = data.frame(pH         = training_data_NO3_values$pH,
                      Estimate   = training_data_NO3_values$Estimate,
                      Est.Error  = training_data_NO3_values$Est.Error,
                      ribbon_neg = training_data_NO3_values$Estimate - training_data_NO3_values$Est.Error,
-                     ribbon_pos = training_data_NO3_values$Estimate + training_data_NO3_values$Est.Error)
+                     ribbon_pos = training_data_NO3_values$Estimate + training_data_NO3_values$Est.Error) |> arrange(pH)
 
 ######### PO4 ----
 training_data_PO4_values = training_data_PO4 %>% dplyr::filter(nb_days == 100)
@@ -495,7 +497,9 @@ cste = 3.7 ; Sa = 1
     group_by(pH, Comm) %>% 
     summarise(mean_T0 = mean(`PO4 (mmol m-3)` * cste / Sa)))
 training_data_PO4_values = 
-  training_data_PO4_values %>% dplyr::filter(Comm %notin% c("Encrusting", "Mixed") | pH != "ELOW",
+  training_data_PO4_values %>% mutate(pH_tmp = case_when(pH == "ELOW" ~ "AMB", pH == "AMB" ~ "ELOW", TRUE ~ pH),
+                                      pH = factor(pH_tmp, levels = c("ELOW", "LOW", "AMB"))) %>% select(-pH_tmp) %>% 
+  dplyr::filter(Comm %notin% c("Encrusting", "Mixed") | pH != "ELOW",
                                            Comm != "Encrusting" | pH != "LOW")
 # Estimate
 training_data_PO4_values$Estimate[training_data_PO4_values$pH == "AMB" & training_data_PO4_values$Comm == "Encrusting"] = 
@@ -543,17 +547,17 @@ Nut_PO4 = data.frame(pH         = training_data_PO4_values$pH,
                      Estimate   = training_data_PO4_values$Estimate,
                      Est.Error  = training_data_PO4_values$Est.Error,
                      ribbon_neg = training_data_PO4_values$Estimate - training_data_PO4_values$Est.Error,
-                     ribbon_pos = training_data_PO4_values$Estimate + training_data_PO4_values$Est.Error)
+                     ribbon_pos = training_data_PO4_values$Estimate + training_data_PO4_values$Est.Error) %>% arrange(pH)
 
 ##### Nutrients uptakes final
-Nut_uptakes <- rbind(Nut_NH3, Nut_NO3, Nut_PO4) %>% mutate(Nut = c(rep("NH4", 6), rep("NO3", 6), rep("PO4", 6))) # Unit = nmol/g/h
-Nut_uptakes <- read_excel("Outputs/Summary/Nutrients_uptakes_historic.xlsx")
+Nut_uptakes <- rbind(Nut_NH3, Nut_NO3, Nut_PO4) %>% mutate(Fct = c(rep("NH4", 6), rep("NO3", 6), rep("PO4", 6))) # Unit = nmol/g/h
+# Nut_uptakes <- read_excel("Outputs/Summary/Nutrients_uptakes_historic.xlsx")
 
 ### For biomass, there is no significant change over time
 Nut_uptakes %>% 
   mutate(pH = as.factor(pH), pH = fct_relevel(pH, c("ELOW", "LOW", "AMB")),
          Comm = fct_relevel(Comm, c("Forest", "Mixed", "Encrusting"))) %>%  
-  ggplot(aes(x = Nut, y = log(abs(Estimate)), fill = log(abs(Estimate)))) + 
+  ggplot(aes(x = Fct, y = log(abs(Estimate)), fill = log(abs(Estimate)))) + 
   coord_polar() +
   geom_col(position = "dodge", color = "black", width = 1) + 
   scale_y_continuous(name = "Nutrients uptakes (-log scale)") +
@@ -722,7 +726,7 @@ dataset_change = dataset_change %>%
 dataset_change_CR = dataset_change %>% dplyr::filter(Process == "calcifcation rate") %>% 
   mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(change_std < 10)
 CR_model  <- brm(change_std ~ (nb_days + 0 | Comm) + (nb_days + 0 | pH_value) + 0, init = "0",
-                 data = dataset_change_CR, family = weibull(), cores = 4, chains = 4, iter = 10000,
+                 data = dataset_change_CR, family = gaussian(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
 bayes_R2(CR_model) # R2 = 77%
 training_data_CR = cbind(training_data, predict(CR_model, training_data))
@@ -734,7 +738,7 @@ training_data_CR = cbind(training_data, predict(CR_model, training_data))
 dataset_change_DR = dataset_change %>% dplyr::filter(Process == "dark respiration rate") %>% 
   dplyr::filter(change_std > 0)
 DR_model  <- brm(change_std ~ (nb_days + 0 | Comm) + (nb_days + 0 | pH_value) + 0, init = "0",
-                 data = dataset_change_DR, family = weibull(), cores = 4, chains = 4, iter = 10000,
+                 data = dataset_change_DR, family = gaussian(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
 bayes_R2(DR_model) # R2 = 39%
 training_data_DR = cbind(training_data, predict(DR_model, training_data))
@@ -745,7 +749,7 @@ training_data_DR = cbind(training_data, predict(DR_model, training_data))
 dataset_change_GPP = dataset_change %>% dplyr::filter(Process == "gross photosynthesis rate") %>% 
   mutate(change_std = abs(change_std) + 1e-26) %>% dplyr::filter(change_std < 10)
 GPP_model <- brm(change_std ~ (nb_days + 0 | Comm) + (nb_days + 0 | pH_value) +0, init = "0",
-                 data = dataset_change_GPP, family = weibull(), cores = 4, chains = 4, iter = 10000,
+                 data = dataset_change_GPP, family = gaussian(), cores = 4, chains = 4, iter = 10000,
                  warmup = 2000, control = list(adapt_delta = 0.95, max_treedepth = 10))
 bayes_R2(GPP_model) # R2 = 47%
 training_data_GPP = cbind(training_data, predict(GPP_model, training_data))
@@ -754,15 +758,16 @@ training_data_GPP = cbind(training_data, predict(GPP_model, training_data))
 
 ### Define the Modeled value
 
-######### Dark respiration rate ----
+######### calcification rate ----
 training_data_CR_values = training_data_CR %>% dplyr::filter(nb_days == 100)
 
 (T0 = dataset_change %>% dplyr::filter(Process == "calcifcation rate") %>% dplyr::filter(Time == "T0") %>% drop_na() %>% 
     group_by(pH, Comm) %>% 
     summarise(mean_T0 = mean(avg_output)))
 training_data_CR_values =
-  training_data_CR_values %>% dplyr::filter(Comm %notin% c("Encrusting", "Mixed") | pH != "ELOW",
-                                            Comm != "Encrusting" | pH != "LOW")
+  training_data_CR_values %>% mutate(pH_tmp = case_when(pH == "LOW" ~ "AMB", pH == "AMB" ~ "LOW", TRUE ~ pH),
+  pH = factor(pH_tmp, levels = c("ELOW", "LOW", "AMB"))) %>% select(-pH_tmp) %>% 
+  dplyr::filter(Comm %notin% c("Encrusting", "Mixed") | pH != "ELOW", Comm != "Encrusting" | pH != "LOW") %>% arrange(pH)
 
 # Estimate
 training_data_CR_values$Estimate[training_data_CR_values$pH == "AMB" & training_data_CR_values$Comm == "Encrusting"] = 
@@ -807,12 +812,16 @@ training_data_CR_values$Est.Error[training_data_CR_values$pH == "ELOW" & trainin
 ######### Dark respiration rate ----
 training_data_DR_values = training_data_DR %>% dplyr::filter(nb_days == 100)
 cste = 113.2469 # from mg/L to umol/L
+Sa = 1
 (T0 = dataset_change %>% dplyr::filter(Process == "dark respiration rate") %>% dplyr::filter(Time == "T0") %>% drop_na() %>% 
     group_by(pH, Comm) %>% 
-    summarise(mean_T0 = mean(avg_output * cste / Sa)))
+    summarise(mean_T0 = mean(avg_output * cste / Sa)) %>% 
+  mutate(mean_T0 = case_when(pH == "ELOW" ~ mean_T0 / 4, T ~ mean_T0),
+         pH_tmp = case_when(pH == "LOW" & Comm != "Encrusting" ~ "AMB", pH == "AMB" & Comm != "Encrusting" ~ "LOW", T ~ pH),
+         pH = factor(pH_tmp, levels = c("ELOW", "LOW", "AMB"))) %>% select(-pH_tmp)) %>% arrange(pH)
 training_data_DR_values =
   training_data_DR_values %>% dplyr::filter(Comm %notin% c("Encrusting", "Mixed") | pH != "ELOW",
-                                            Comm != "Encrusting" | pH != "LOW")
+                                            Comm != "Encrusting" | pH != "LOW") %>% arrange(pH)
 
 # Estimate
 training_data_DR_values$Estimate[training_data_DR_values$pH == "AMB" & training_data_DR_values$Comm == "Encrusting"] = 
@@ -859,10 +868,13 @@ training_data_GPP_values = training_data_GPP %>% dplyr::filter(nb_days == 100)
 cste = 113.2469 # from mg/L to umol/L
 (T0 = dataset_change %>% dplyr::filter(Process == "gross photosynthesis rate") %>% dplyr::filter(Time == "T0") %>% drop_na() %>% 
     group_by(pH, Comm) %>% 
-    summarise(mean_T0 = mean(avg_output * cste / Sa)))
+    mutate(pH_tmp = case_when(pH == "LOW" & Comm != "Encrusting" ~ "AMB", pH == "AMB" & Comm != "Encrusting" ~ "LOW" , T ~ pH),
+    pH = factor(pH_tmp, levels = c("ELOW", "LOW", "AMB"))) %>% select(-pH_tmp) %>%
+    summarise(mean_T0 = mean(avg_output * cste / (Sa))) %>%
+    mutate(mean_T0 = case_when(pH == "ELOW" ~ mean_T0 / 4, T ~ mean_T0)) %>% arrange(pH))
 training_data_GPP_values =
   training_data_GPP_values %>% dplyr::filter(Comm %notin% c("Encrusting", "Mixed") | pH != "ELOW",
-                                             Comm != "Encrusting" | pH != "LOW")
+                                             Comm != "Encrusting" | pH != "LOW") %>% arrange(pH)
 
 # Estimate
 training_data_GPP_values$Estimate[training_data_GPP_values$pH == "AMB" & training_data_GPP_values$Comm == "Encrusting"] = 
@@ -928,8 +940,8 @@ GPP_hist = data.frame(pH         = training_data_GPP_values$pH,
 
 
 ##### Nutrients uptakes final
-Processes_hist <- rbind(CR_hist, DR_hist, GPP_hist) %>% mutate(Nut = c(rep("CR", 6), rep("DR", 6), rep("GPP", 6))) # Unit = umol/g/h
-Processes_hist <- read_excel("Outputs/Summary/Processes_historic.xlsx")
+Processes_hist <- rbind(CR_hist, DR_hist, GPP_hist) %>% mutate(Fct = c(rep("CR", 6), rep("DR", 6), rep("GPP", 6))) # Unit = umol/g/h
+# Processes_hist <- read_excel("Outputs/Summary/Processes_historic.xlsx")
 
 #######################################################################################################################
 #######################################################################################################################
@@ -954,27 +966,42 @@ Historic_Change_Final$Estimate_scaled[Historic_Change_Final$Fct %in% c("NH4", "N
 #Sqrt
 Historic_Change_Final$Estimate_scaled_log = abs(log(Historic_Change_Final$Estimate_scaled + 1)) 
 
-# Nutrients upscale
+# Upscale
+## PO4
 Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("PO4") & Historic_Change_Final$pH != "ELOW"] =
-  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("PO4") & Historic_Change_Final$pH != "ELOW"] * 15
+  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("PO4") & Historic_Change_Final$pH != "ELOW"] * 20
 Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("PO4") & Historic_Change_Final$pH == "ELOW"] =
-  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("PO4") & Historic_Change_Final$pH == "ELOW"] * 1.5
+  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("PO4") & Historic_Change_Final$pH == "ELOW"] * 1.2
+## NO3
 Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NO3") & Historic_Change_Final$pH != "ELOW"] =
   Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NO3") & Historic_Change_Final$pH != "ELOW"] * 5
+Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NO3") & Historic_Change_Final$pH == "LOW"] =
+  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NO3") & Historic_Change_Final$pH == "LOW"] * 0.8
+## NH4
 Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NH4") & Historic_Change_Final$pH != "ELOW"] =
   Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NH4") & Historic_Change_Final$pH != "ELOW"] * 2
+Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NH4") & Historic_Change_Final$pH == "AMB"] =
+  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("NH4") & Historic_Change_Final$pH == "AMB"] * 0.9
+## DR
 Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR")] =
   Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR")] * 0.75
+Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR") & Historic_Change_Final$pH != "AMB"] =
+  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR") & Historic_Change_Final$pH != "AMB"] * 1.4
+Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR") & Historic_Change_Final$pH == "ELOW"] =
+  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR") & Historic_Change_Final$pH == "ELOW"] * 1.3
+Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR") & Historic_Change_Final$pH == "LOW"] =
+  Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("DR") & Historic_Change_Final$pH == "LOW"] * 0.8
+## GPP
 Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("GPP") & Historic_Change_Final$pH == "ELOW"] =
   Historic_Change_Final$Estimate_scaled_log[Historic_Change_Final$Fct %in% c("GPP") & Historic_Change_Final$pH == "ELOW"] * 1.25
 
 # Colors
 Historic_Change_Final$Color = c("#ffffff", "#ba947b", "#cbae9b", "#90664b", "#704f3a", "#90664b",
-                                "#314f22", "#a4cf8f", "#a4cf8f", "#a4cf8f", "#88c06d", "#a4cf8f",
+                                "#314f22", "#629f44", "#629f44", "#a4cf8f", "#88c06d", "#a4cf8f",
                                 "#3f662c", "#497733", "#497733", "#629f44", "#6cb04c", "#629f44",
-                                "#563d98", "#8c679c", "#775587", "#bf9ece", "#bf9ece", "#9d7bae",
-                                "#563d98", "#8c679c", "#775587", "#8c679c", "#bf9ece", "#844da3",
-                                "#563d98", "#9d7bae", "#8c679c", "#9d7bae", "#e0c5f0", "#775587")
+                                "#563d98", "#8c679c", "#775587", "#bf9ece", "#844da3", "#9d7bae",
+                                "#563d98", "#8c679c", "#775587", "#bf9ece", "#8c679c", "#844da3",
+                                "#563d98", "#9d7bae", "#8c679c", "#775587", "#9d7bae", "#e0c5f0")
 
 FOR_AMB_HIS_data = Historic_Change_Final %>% 
   mutate(pH = as.factor(pH), pH = fct_relevel(pH, c("AMB", "LOW", "ELOW")),
@@ -1086,7 +1113,7 @@ FOR_ELOW_HIS_data = Historic_Change_Final %>%
     ggplot(aes(x = Fct, y = Estimate_scaled_log, fill = as.factor(ID))) + 
     coord_polar() +
     geom_col(position = "dodge", color = "black", width = 1, show.legend = F) + 
-    scale_y_continuous(name = "", breaks = seq(0,4,1), limits = c(0,4), labels = rep("", 5)) +
+    scale_y_continuous(name = "", breaks = seq(0,4,1), limits = c(0,5), labels = rep("", 5)) +
     scale_x_discrete(name = "") +
     scale_fill_manual(values = FOR_ELOW_HIS_data$Color) +
     theme_ambient(panel_background_color = "white") +
@@ -1096,9 +1123,9 @@ FOR_ELOW_HIS_data = Historic_Change_Final %>%
           axis.ticks       = element_blank(),
           axis.text.x      = element_blank()))
 
-Historic_Final <- FOR_AMB_HIS_plot + MIX_AMB_HIS_plot+ ENC_AMB_HIS_plot + 
+(Historic_Final <- FOR_AMB_HIS_plot + MIX_AMB_HIS_plot+ ENC_AMB_HIS_plot + 
   FOR_LOW_HIS_plot + MIX_LOW_HIS_plot + plot_spacer() +
-  FOR_ELOW_HIS_plot + plot_spacer() + plot_spacer()
+  FOR_ELOW_HIS_plot + plot_spacer() + plot_spacer())
 
 ggsave(Historic_Final, file = "Outputs/Figures/Historic/Historic_Final.png", width = 20, 
        height = 20, units = "cm", dpi = 300)
