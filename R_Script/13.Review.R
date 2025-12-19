@@ -236,8 +236,8 @@ weibull_AMB_mix <- cbind(training_data, predict(model_weibull[[9]], training_dat
 weibull_AMB_enc <- cbind(training_data, predict(model_weibull[[7]], training_data)) %>% mutate(pH = rep("AMB",  dim(training_data)[1]))
 weibull_AMB_for <- cbind(training_data, predict(model_weibull[[8]], training_data)) %>% mutate(pH = rep("AMB",  dim(training_data)[1]))
 weibull_LOW_mix <- cbind(training_data, predict(model_weibull[[6]], training_data)) %>% mutate(pH = rep("LOW",  dim(training_data)[1]))
-weibull_LOW_enc <- cbind(training_data, predict(model_weibull[[4]], training_data)) %>% mutate(pH = rep("LOW",  dim(training_data)[1]))
-weibull_LOW_for <- cbind(training_data, predict(model_weibull[[5]], training_data)) %>% mutate(pH = rep("LOW",  dim(training_data)[1]))
+weibull_LOW_enc <- cbind(training_data, predict(model_weibull[[5]], training_data)) %>% mutate(pH = rep("LOW",  dim(training_data)[1]))
+weibull_LOW_for <- cbind(training_data, predict(model_weibull[[4]], training_data)) %>% mutate(pH = rep("LOW",  dim(training_data)[1]))
 weibull_ELO_mix <- cbind(training_data, predict(model_weibull[[3]], training_data)) %>% mutate(pH = rep("ELOW", dim(training_data)[1]))
 weibull_ELO_enc <- cbind(training_data, predict(model_weibull[[1]], training_data)) %>% mutate(pH = rep("ELOW", dim(training_data)[1]))
 weibull_ELO_for <- cbind(training_data, predict(model_weibull[[2]], training_data)) %>% mutate(pH = rep("ELOW", dim(training_data)[1]))
@@ -360,7 +360,7 @@ C = ggplot() + ggtitle("Calcifying macroalgae-dominated communities") +
         axis.text.y     = element_text(size = 0),
         legend.position = "bottom")
 
-fig_S7 <- A+ B + C 
+(fig_S7 <- A + B + C )
 
 ggsave(fig_S7, filename = "fig_S7_Review.png", 
        path = "Outputs/Figures/Final_Figures/PNG/", device = "png", width = 30, 
