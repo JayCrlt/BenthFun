@@ -29,23 +29,109 @@ If you want to skip directly to the main figures:\
 System informations
 
 ```
-R version 4.2.1 (2022-06-23)
-Platform: x86_64-apple-darwin17.0 (64-bit)
-Running under: macOS Monterey 12.2.1
+─ Session info ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.4.3 (2025-02-28)
+ os       macOS 26.2
+ system   aarch64, darwin20
+ ui       RStudio
+ language (EN)
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       Europe/Madrid
+ date     2026-02-15
+ rstudio  2026.01.0+392 Apple Blossom (desktop)
+ pandoc   NA
+ quarto   1.8.25 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/quarto
 
-Matrix products: default
-LAPACK: /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRlapack.dylib
+─ Packages ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ package        * version  date (UTC) lib source
+ abind            1.4-8    2024-09-12 [1] CRAN (R 4.4.1)
+ backports        1.5.0    2024-05-23 [1] CRAN (R 4.4.1)
+ bayesplot        1.11.1   2024-02-15 [1] CRAN (R 4.4.0)
+ bridgesampling   1.1-2    2021-04-16 [1] CRAN (R 4.4.0)
+ brms           * 2.22.0   2024-09-23 [1] CRAN (R 4.4.1)
+ Brobdingnag      1.2-9    2022-10-19 [1] CRAN (R 4.4.0)
+ callr            3.7.6    2024-03-25 [1] CRAN (R 4.4.0)
+ cellranger       1.1.0    2016-07-27 [1] CRAN (R 4.4.0)
+ checkmate        2.3.2    2024-07-29 [1] CRAN (R 4.4.0)
+ cli              3.6.5    2025-04-23 [1] CRAN (R 4.4.1)
+ coda             0.19-4.1 2024-01-31 [1] CRAN (R 4.4.1)
+ codetools        0.2-20   2024-03-31 [1] CRAN (R 4.4.3)
+ colorspace       2.1-1    2024-07-26 [1] CRAN (R 4.4.1)
+ crayon           1.5.3    2024-06-20 [1] CRAN (R 4.4.1)
+ curl             7.0.0    2025-08-19 [1] CRAN (R 4.4.1)
+ distributional   0.5.0    2024-09-17 [1] CRAN (R 4.4.1)
+ dplyr          * 1.1.4    2023-11-17 [1] CRAN (R 4.4.0)
+ emmeans          1.10.7   2025-01-31 [1] CRAN (R 4.4.1)
+ estimability     1.5.1    2024-05-12 [1] CRAN (R 4.4.1)
+ farver           2.1.2    2024-05-13 [1] CRAN (R 4.4.1)
+ forcats        * 1.0.0    2023-01-29 [1] CRAN (R 4.4.0)
+ generics         0.1.4    2025-05-09 [1] CRAN (R 4.4.1)
+ ggplot2        * 4.0.0    2025-09-11 [1] CRAN (R 4.4.1)
+ ggridges       * 0.5.6    2024-01-23 [1] CRAN (R 4.4.0)
+ glue             1.8.0    2024-09-30 [1] CRAN (R 4.4.1)
+ gridExtra        2.3      2017-09-09 [1] CRAN (R 4.4.1)
+ gtable           0.3.6    2024-10-25 [1] CRAN (R 4.4.1)
+ hms              1.1.3    2023-03-21 [1] CRAN (R 4.4.0)
+ inline           0.3.21   2025-01-09 [1] CRAN (R 4.4.1)
+ jsonlite         2.0.0    2025-03-27 [1] CRAN (R 4.4.1)
+ labeling         0.4.3    2023-08-29 [1] CRAN (R 4.4.1)
+ lattice          0.22-6   2024-03-20 [1] CRAN (R 4.4.3)
+ lifecycle        1.0.4    2023-11-07 [1] CRAN (R 4.4.1)
+ loo              2.8.0    2024-07-03 [1] CRAN (R 4.4.0)
+ lubridate      * 1.9.4    2024-12-08 [1] CRAN (R 4.4.1)
+ magrittr         2.0.3    2022-03-30 [1] CRAN (R 4.4.1)
+ Matrix           1.7-2    2025-01-23 [1] CRAN (R 4.4.3)
+ matrixStats      1.5.0    2025-01-07 [1] CRAN (R 4.4.1)
+ mvtnorm          1.3-3    2025-01-10 [1] CRAN (R 4.4.1)
+ nlme             3.1-167  2025-01-27 [1] CRAN (R 4.4.3)
+ patchwork      * 1.3.0    2024-09-16 [1] CRAN (R 4.4.1)
+ pillar           1.10.2   2025-04-05 [1] CRAN (R 4.4.1)
+ pkgbuild         1.4.7    2025-03-24 [1] CRAN (R 4.4.3)
+ pkgconfig        2.0.3    2019-09-22 [1] CRAN (R 4.4.1)
+ posterior        1.6.1    2025-02-27 [1] CRAN (R 4.4.1)
+ processx         3.8.6    2025-02-21 [1] CRAN (R 4.4.1)
+ ps               1.9.1    2025-04-12 [1] CRAN (R 4.4.1)
+ purrr          * 1.0.4    2025-02-05 [1] CRAN (R 4.4.1)
+ QuickJSR         1.7.0    2025-03-31 [1] CRAN (R 4.4.1)
+ R6               2.6.1    2025-02-15 [1] CRAN (R 4.4.1)
+ ragg             1.3.3    2024-09-11 [1] CRAN (R 4.4.1)
+ RColorBrewer     1.1-3    2022-04-03 [1] CRAN (R 4.4.1)
+ Rcpp           * 1.1.0    2025-07-02 [1] CRAN (R 4.4.1)
+ RcppParallel     5.1.10   2025-01-24 [1] CRAN (R 4.4.1)
+ readr          * 2.1.5    2024-01-10 [1] CRAN (R 4.4.0)
+ readxl         * 1.4.4    2025-02-27 [1] CRAN (R 4.4.1)
+ rJava            1.0-11   2024-01-26 [1] CRAN (R 4.4.1)
+ rlang            1.1.6    2025-04-11 [1] CRAN (R 4.4.1)
+ rstan            2.32.7   2025-03-10 [1] CRAN (R 4.4.1)
+ rstantools       2.4.0    2024-01-31 [1] CRAN (R 4.4.1)
+ rstudioapi       0.17.1   2024-10-22 [1] CRAN (R 4.4.1)
+ S7               0.2.0    2024-11-07 [1] CRAN (R 4.4.1)
+ scales           1.4.0    2025-04-24 [1] CRAN (R 4.4.1)
+ sessioninfo      1.2.3    2025-02-05 [1] CRAN (R 4.4.1)
+ StanHeaders      2.32.10  2024-07-15 [1] CRAN (R 4.4.1)
+ stringi          1.8.7    2025-03-27 [1] CRAN (R 4.4.1)
+ stringr        * 1.5.1    2023-11-14 [1] CRAN (R 4.4.0)
+ systemfonts      1.3.1    2025-10-01 [1] CRAN (R 4.4.1)
+ tensorA          0.36.2.1 2023-12-13 [1] CRAN (R 4.4.1)
+ textshaping      1.0.0    2025-01-20 [1] CRAN (R 4.4.1)
+ tibble         * 3.2.1    2023-03-20 [1] CRAN (R 4.4.0)
+ tidyr          * 1.3.1    2024-01-24 [1] CRAN (R 4.4.1)
+ tidyselect       1.2.1    2024-03-11 [1] CRAN (R 4.4.0)
+ tidyverse      * 2.0.0    2023-02-22 [1] CRAN (R 4.4.0)
+ timechange       0.3.0    2024-01-18 [1] CRAN (R 4.4.1)
+ tzdb             0.5.0    2025-03-15 [1] CRAN (R 4.4.1)
+ utf8             1.2.5    2025-05-01 [1] CRAN (R 4.4.1)
+ V8               6.0.1    2025-02-02 [1] CRAN (R 4.4.1)
+ vctrs            0.6.5    2023-12-01 [1] CRAN (R 4.4.0)
+ withr            3.0.2    2024-10-28 [1] CRAN (R 4.4.1)
+ xlsx             0.6.5    2020-11-10 [1] CRAN (R 4.4.0)
+ xlsxjars         0.6.1    2014-08-22 [1] CRAN (R 4.4.1)
+ xtable           1.8-4    2019-04-21 [1] CRAN (R 4.4.1)
 
-locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-
-attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
-
-other attached packages:
-[1]  readxl_1.4.2   patchwork_1.1.2  lubridate_1.9.2  forcats_1.0.0  stringr_1.5.0   
-[6]  dplyr_1.1.0    purrr_1.0.1      readr_2.1.4      tidyr_1.3.0    tibble_3.2.0    
-[11] ggplot2_3.4.1  tidyverse_2.0.0
+ [1] /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library
+ * ── Packages attached to the search path.
 ```
 
 ---
