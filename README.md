@@ -15,12 +15,13 @@
 
 This repository hosts the main `BenthFun project` documents. The fieldwork will be split into two campaigns 🤿 (i.e., spring 🍃 2023 and fall 🍂 2023).\
 
-`DISCLAIMER #1`: The raw observational data supporting this study cannot be released until the completion of the Beatriu de Pinos grant 2024BP00106 (expected 31/08/2027). To ensure reproducibility, we provide the fully processed datasets and model outputs used for all analyses and figures, along with annotated code detailing all steps from raw data to final results. Upon completion of the grant, the raw data will be made publicly available in this repository.\
-`DISCLAIMER #2`: All figures and figure panels presented in the manuscript were post-processed in Keynote (Apple). Consequently, the plots generated using the code provided here may have different formatting, or arrangements compared to those shown in the published manuscript. Nevertheless, the provided code reproduces all figures exactly in their raw form, enabling full replication of the underlying analyses.
+⚠️ `DISCLAIMER #1`: The raw observational data supporting this study cannot be released until the completion of the Beatriu de Pinos grant 2024BP00106 (expected 31/08/2027). To ensure reproducibility, we provide the fully processed datasets and model outputs used for all analyses and figures, along with annotated code detailing all steps from raw data to final results. Upon completion of the grant, the raw data will be made publicly available in this repository.\
+
+⚠️ `DISCLAIMER #2`: All figures and figure panels presented in the manuscript were post-processed in Keynote (Apple). Consequently, the plots generated using the code provided here may have different formatting, or arrangements compared to those shown in the published manuscript. Nevertheless, the provided code reproduces all figures exactly in their raw form, enabling full replication of the underlying analyses.
 
 and the repository is organized into 3 main folders as follows:
 
-📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures 💻.\
+📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures ✏️.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_1.xlsx) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_2.xlsx) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_3.xlsx) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_4.xlsx) • 
 
 📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main outputs for further analyses. 
