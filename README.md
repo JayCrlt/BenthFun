@@ -24,8 +24,7 @@ This repository hosts the main `BenthFun project` documents. The fieldwork will 
 📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures ✏️.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_1.xlsx) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_2.xlsx) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_3.xlsx) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_4.xlsx) • 
 
-📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main outputs for further analyses. 
-You might find the main figures 📊, summary and intermediate tables 📋 defined from analyses to generate summaries and figures.\
+📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures 📊.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_1.png) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_2.png) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_3.png) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_4.png) • 
 
 📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses 💻.\
