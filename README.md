@@ -15,7 +15,7 @@
 
 This repository hosts the main `BenthFun project` documents. The fieldwork will be split into two campaigns 🤿 (i.e., spring 🍃 2023 and fall 🍂 2023).\
 
-`DISCLAIMER #1`: The raw observational data supporting this study cannot be released until the completion of the Beatriu de Pinos grant 2024BP00106 (expected 31/08/2027). To ensure reproducibility, we provide the fully processed datasets and model outputs used for all analyses and figures, along with annotated code detailing all steps from raw data to final results. Upon completion of the grant, the raw data will be made publicly available in this repository.
+`DISCLAIMER #1`: The raw observational data supporting this study cannot be released until the completion of the Beatriu de Pinos grant 2024BP00106 (expected 31/08/2027). To ensure reproducibility, we provide the fully processed datasets and model outputs used for all analyses and figures, along with annotated code detailing all steps from raw data to final results. Upon completion of the grant, the raw data will be made publicly available in this repository.\
 `DISCLAIMER #2`: All figures and figure panels presented in the manuscript were post-processed in Keynote (Apple). Consequently, the plots generated using the code provided here may have different formatting, or arrangements compared to those shown in the published manuscript. Nevertheless, the provided code reproduces all figures exactly in their raw form, enabling full replication of the underlying analyses.
 
 and the repository is organized into 3 main folders as follows:
@@ -27,7 +27,7 @@ and the repository is organized into 3 main folders as follows:
 You might find the main figures 📊, summary and intermediate tables 📋 defined from analyses to generate summaries and figures.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_1.png) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_2.png) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_3.png) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_4.png) • 
 
-📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses 💻.
+📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses 💻.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_1_Script.R) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_2_Script.R) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_3_Script.R) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_4_Script.R) • 
 
 ---
