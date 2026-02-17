@@ -42,8 +42,8 @@ Each script is documented and linked below:\
 - [8. Covers_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/8.%20Covers_communities.R): Quantifies community cover on experimental tiles across different sampling times.
 - [9. Biomass_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/9.%20Biomass_communities.R): Estimates community biomass on experimental tiles across sampling times (Figure 2).
 - [10. Conditions_T0.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/10.%20Conditions_T0.R): Defines initial (pre-experimental) conditions (Table 1).
-- [11. Changes_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/10.%20Changes_communities.R): Quantifies temporal changes in ecosystem functions.
-- [12. Long-term](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/11.%20Long-term.R): Assesses long-term functional changes on historical tiles (Figure 4).
+- [11. Changes_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/11.%20Changes_communities.R): Quantifies temporal changes in ecosystem functions.
+- [12. Long-term](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/12.%20Long-term.R): Assesses long-term functional changes on historical tiles (Figure 4).
 - [13. Review](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/13.Review.R): Addresses reviewer comments from Round 1, including the generation of the revised Figure 3.
 
 ---
