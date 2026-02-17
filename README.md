@@ -19,7 +19,7 @@ The raw observational data underlying this study are subject to a temporary emba
 **Figure reproducibility.**
 All figures and figure panels presented in the manuscript were graphically post-processed for publication purposes. As a result, figures generated directly from the provided code may differ slightly in layout or formatting from those shown in the published article. However, the code reproduces all figures in their analytical (raw) form and fully replicates the underlying results.
 
-**Repository structure.**
+**Repository structure.**\
 📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_1.xlsx) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_2.xlsx) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_3.xlsx) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_4.xlsx) • 
 
@@ -30,7 +30,6 @@ All figures and figure panels presented in the manuscript were graphically post-
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_1_Script.R) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_2_Script.R) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_3_Script.R) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_4_Script.R) • 
 
 The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. Once the raw data are released, these scripts will serve as the complete processing and analysis pipeline, from raw measurements to final results.
-
 Each script is documented and linked below:\
 - [0. Titration_alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/0.%20Titration_alkalinity.R): Quantifies total alkalinity (AT) from processed titration samples.
 - [1. Quality_Check_O2_Sensors.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/1.%20Quality_Check_O2_Sensors.R): Formats and performs quality control on oxygen data obtained from sensors.
