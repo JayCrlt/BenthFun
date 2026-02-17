@@ -26,16 +26,16 @@ All figures and figure panels presented in the manuscript were graphically post-
 📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
 The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. Once the raw data are released, these scripts will serve as the complete processing and analysis pipeline, from raw measurements to final results.
 Each script is documented and linked below:\
-- [0. Titration_alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/0.%20Titration_alkalinity.R): Quantifies total alkalinity (AT) from processed titration samples.
-- [1. Quality_Check_O2_Sensors.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/1.%20Quality_Check_O2_Sensors.R): Formats and performs quality control on oxygen data obtained from sensors.
-- [2. MiniDots.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/2.%20MiniDots.R) : Extracts oxygen data to estimate dark respiration (DR) and gross photosynthetic rates (GP) of the samples.
-- [3. Alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/3.%20Alkalinity.R): Converts changes in total alkalinity into calcification rates.
-- [4. PI_Photo.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/4.%20PI_Photo.R): Derives the relationships between calcification rate (CR), dark respiration (DR), gross photosynthesis (GP), and irradiance (photosynthesis–irradiance curves).
-- [5. PAR_profiles.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/5.%20PAR_profiles.R): Extracts light (PAR) profiles recorded during incubation experiments.
-- [6. Vizualisation.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/6.%20Vizualisation.R): Visualizes the three pH conditions across the three study sites (Figure 1).
-- [7. Nutrients.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/7.%20Nutrients.R): Extracts and processes nutrient uptake data.
-- [8. Covers_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/8.%20Covers_communities.R): Quantifies community cover on experimental tiles across different sampling times.
-- [9. Biomass_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/9.%20Biomass_communities.R): Estimates community biomass on experimental tiles across sampling times (Figure 2).
+- [0. Titration_alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/00.%20Titration_alkalinity.R): Quantifies total alkalinity (AT) from processed titration samples.
+- [1. Quality_Check_O2_Sensors.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/01.%20Quality_Check_O2_Sensors.R): Formats and performs quality control on oxygen data obtained from sensors.
+- [2. MiniDots.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02.%20MiniDots.R) : Extracts oxygen data to estimate dark respiration (DR) and gross photosynthetic rates (GP) of the samples.
+- [3. Alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/03.%20Alkalinity.R): Converts changes in total alkalinity into calcification rates.
+- [4. PI_Photo.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/04.%20PI_Photo.R): Derives the relationships between calcification rate (CR), dark respiration (DR), gross photosynthesis (GP), and irradiance (photosynthesis–irradiance curves).
+- [5. PAR_profiles.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/05.%20PAR_profiles.R): Extracts light (PAR) profiles recorded during incubation experiments.
+- [6. Vizualisation.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/06.%20Vizualisation.R): Visualizes the three pH conditions across the three study sites (Figure 1).
+- [7. Nutrients.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/07.%20Nutrients.R): Extracts and processes nutrient uptake data.
+- [8. Covers_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/08.%20Covers_communities.R): Quantifies community cover on experimental tiles across different sampling times.
+- [9. Biomass_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/09.%20Biomass_communities.R): Estimates community biomass on experimental tiles across sampling times (Figure 2).
 - [10. Conditions_T0.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/10.%20Conditions_T0.R): Defines initial (pre-experimental) conditions (Table 1).
 - [11. Changes_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/11.%20Changes_communities.R): Quantifies temporal changes in ecosystem functions.
 - [12. Long-term](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/12.%20Long-term.R): Assesses long-term functional changes on historical tiles (Figure 4).
