@@ -36,8 +36,8 @@ Each script is documented and linked below:\
 - [1. Quality_Check_O2_Sensors.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/1.%20Quality_Check_O2_Sensors.R): Formats and performs quality control on oxygen data obtained from sensors.
 - [2. MiniDots.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/2.%20MiniDots.R) : Extracts oxygen data to estimate dark respiration (DR) and gross photosynthetic rates (GP) of the samples.
 - [3. Alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/3.%20Alkalinity.R): Converts changes in total alkalinity into calcification rates.
-- [4. PI_Photo.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/4.%20PI_Photo.R): Derives the relationships between calcification rate (CR), dark respiration (DR), gross photosynthesis (GP), and irradiance (photosynthesis–irradiance curves).\
-– [5. PAR_profiles.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/5.%20PAR_profiles.R): Extracts light (PAR) profiles recorded during incubation experiments.
+- [4. PI_Photo.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/4.%20PI_Photo.R): Derives the relationships between calcification rate (CR), dark respiration (DR), gross photosynthesis (GP), and irradiance (photosynthesis–irradiance curves).
+- [5. PAR_profiles.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/5.%20PAR_profiles.R): Extracts light (PAR) profiles recorded during incubation experiments.
 - [6. Vizualisation.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/6.%20Vizualisation.R): Visualizes the three pH conditions across the three study sites (Figure 1).
 - [7. Nutrients.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/7.%20Nutrients.R): Extracts and processes nutrient uptake data.
 - [8. Covers_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/8.%20Covers_communities.R): Quantifies community cover on experimental tiles across different sampling times.
