@@ -31,7 +31,8 @@ All figures and figure panels presented in the manuscript were graphically post-
 
 The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. Once the raw data are released, these scripts will serve as the complete processing and analysis pipeline, from raw measurements to final results.
 
-Each script is documented and linked below:- [0. Titration_alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/0.%20Titration_alkalinity.R): Quantifies total alkalinity (AT) from processed titration samples.
+Each script is documented and linked below:\
+- [0. Titration_alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/0.%20Titration_alkalinity.R): Quantifies total alkalinity (AT) from processed titration samples.
 - [1. Quality_Check_O2_Sensors.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/1.%20Quality_Check_O2_Sensors.R): Formats and performs quality control on oxygen data obtained from sensors.
 - [2. MiniDots.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/2.%20MiniDots.R) : Extracts oxygen data to estimate dark respiration (DR) and gross photosynthetic rates (GP) of the samples.
 - [3. Alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/3.%20Alkalinity.R): Converts changes in total alkalinity into calcification rates.
