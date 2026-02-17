@@ -13,22 +13,38 @@
 
 ---
 
-This repository hosts the main `BenthFun project` documents. The fieldwork will be split into two campaigns 🤿 (i.e., spring 🍃 2023 and fall 🍂 2023).
+**Data availability.**
+The raw observational data underlying this study are subject to a temporary embargo, as they form part of the ongoing Beatriu de Pinós grant (2024BP00106; expected completion: 31 August 2027). To ensure full reproducibility, we provide the complete processed datasets, model outputs, and fully annotated analysis code used to generate all results, tables, and figures in the manuscript. Upon completion of the grant, the raw data will be made publicly available in this repository.
 
-⚠️ `DISCLAIMER #1`: The raw observational data supporting this study cannot be released until the completion of the Beatriu de Pinos grant 2024BP00106 (expected 31/08/2027). To ensure reproducibility, we provide the fully processed datasets and model outputs used for all analyses and figures, along with annotated code detailing all steps from raw data to final results. Upon completion of the grant, the raw data will be made publicly available in this repository.
+**Figure reproducibility.**
+All figures and figure panels presented in the manuscript were graphically post-processed for publication purposes. As a result, figures generated directly from the provided code may differ slightly in layout or formatting from those shown in the published article. However, the code reproduces all figures in their analytical (raw) form and fully replicates the underlying results.
 
-⚠️ `DISCLAIMER #2`: All figures and figure panels presented in the manuscript were post-processed in Keynote (Apple). Consequently, the plots generated using the code provided here may have different formatting, or arrangements compared to those shown in the published manuscript. Nevertheless, the provided code reproduces all figures exactly in their raw form, enabling full replication of the underlying analyses.
-
-➡️ The repository is organized into 3 main folders as follows:
-
-📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures ✏️.\
+**Repository structure.**
+📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_1.xlsx) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_2.xlsx) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_3.xlsx) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_4.xlsx) • 
 
-📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures 📊.\
+📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_1.png) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_2.png) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_3.png) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_4.png) • 
 
-📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses 💻.\
+📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_1_Script.R) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_2_Script.R) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_3_Script.R) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_4_Script.R) • 
+
+The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. Once the raw data are released, these scripts will serve as the complete processing and analysis pipeline, from raw measurements to final results.
+
+Each script is documented and linked below:- [0. Titration_alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/0.%20Titration_alkalinity.R): Quantifies total alkalinity (AT) from processed titration samples.
+- [1. Quality_Check_O2_Sensors.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/1.%20Quality_Check_O2_Sensors.R): Formats and performs quality control on oxygen data obtained from sensors.
+- [2. MiniDots.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/2.%20MiniDots.R) : Extracts oxygen data to estimate dark respiration (DR) and gross photosynthetic rates (GP) of the samples.
+- [3. Alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/3.%20Alkalinity.R): Converts changes in total alkalinity into calcification rates.
+- [4. PI_Photo.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/4.%20PI_Photo.R): Derives the relationships between calcification rate (CR), dark respiration (DR), gross photosynthesis (GP), and irradiance (photosynthesis–irradiance curves).
+– [5. PAR_profiles.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/5.%20PAR_profiles.R): Extracts light (PAR) profiles recorded during incubation experiments.
+- [6. Vizualisation.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/6.%20Vizualisation.R): Visualizes the three pH conditions across the three study sites (Figure 1).
+- [7. Nutrients.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/7.%20Nutrients.R): Extracts and processes nutrient uptake data.
+- [8. Covers_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/8.%20Covers_communities.R): Quantifies community cover on experimental tiles across different sampling times.
+- [9. Biomass_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/9.%20Biomass_communities.R): Estimates community biomass on experimental tiles across sampling times (Figure 2).
+- [10. Conditions_T0.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/10.%20Conditions_T0.R): Defines initial (pre-experimental) conditions (Table 1).
+- [11. Changes_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/10.%20Changes_communities.R): Quantifies temporal changes in ecosystem functions.
+- [12. Long-term](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/11.%20Long-term.R): Assesses long-term functional changes on historical tiles (Figure 4).
+- [13. Review](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/13.Review.R): Addresses reviewer comments from Round 1, including the generation of the revised Figure 3.
 
 ---
 System informations
