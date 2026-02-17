@@ -41,7 +41,7 @@ Each script is documented and linked below:\
 - [12. Long-term](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/12.%20Long-term.R): Assesses long-term functional changes on historical tiles (Figure 4).
 - [13. Review](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/13.Review.R): Addresses reviewer comments from Round 1, including the generation of the revised Figure 3.
 
-The following scripts correspond to the figures in the manuscript and currently work with the processed/model data, as the raw observational data are not yet publicly available. Once the raw data are released, these scripts will serve as the complete pipeline from raw measurements to final results:
+As the raw observational data are not yet publicly available, the following scripts correspond to the figures in the manuscript and currently work with the processed data:\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_1_Script.R) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_2_Script.R) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_3_Script.R) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_4_Script.R) • 
 
 📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures.\
