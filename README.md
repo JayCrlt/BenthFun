@@ -23,9 +23,6 @@ All figures and figure panels presented in the manuscript were graphically post-
 📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_1.xlsx) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_2.xlsx) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_3.xlsx) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_4.xlsx) • 
 
-📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures.\
-• [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_1.png) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_2.png) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_3.png) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_4.png) • 
-
 📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_1_Script.R) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_2_Script.R) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_3_Script.R) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_4_Script.R) • 
 
@@ -46,8 +43,12 @@ Each script is documented and linked below:\
 - [12. Long-term](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/12.%20Long-term.R): Assesses long-term functional changes on historical tiles (Figure 4).
 - [13. Review](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/13.Review.R): Addresses reviewer comments from Round 1, including the generation of the revised Figure 3.
 
+
+📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures.\
+• [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_1.png) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_2.png) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_3.png) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_4.png) • 
+
 ---
-System informations
+**System informations**
 
 ```
 ─ Session info ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -156,6 +157,5 @@ System informations
 ```
 
 ---
-
 **Author contributions**: All authors have agreed to the submission of this manuscript and take responsibility for the integrity, accuracy, and ethics of the work. J.C. and N.T. are responsible for the overall integrity of the manuscript. All authors made substantial intellectual contributions and meet the authorship criteria of Ecology Letters.
 Conceptualization: J.C., S.C., J-P.G. and N.T. Data curation: J.C., A.C., A.M., S.A. and N.T. Formal analysis: J.C. Investigation: J.C., A.C., A.M. and N.T. Writing (first draft): J.C. Writing (review and editing): J.C., S.C., A.C., A.M., S.A., C.L.H., F.M., J-P.G. and N.T. Funding: J.C & N.T. The authors declare no competing interests.
