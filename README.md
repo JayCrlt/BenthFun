@@ -25,7 +25,7 @@ All figures and figure panels presented in the manuscript were graphically post-
 
 📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
 The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. Once the raw data are released, these scripts will serve as the complete processing and analysis pipeline, from raw measurements to final results.
-Each script is documented and linked below:\
+Each script is documented and linked below:
 - [0. Titration_alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/00.%20Titration_alkalinity.R): Quantifies total alkalinity (AT) from processed titration samples.
 - [1. Quality_Check_O2_Sensors.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/01.%20Quality_Check_O2_Sensors.R): Formats and performs quality control on oxygen data obtained from sensors.
 - [2. MiniDots.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02.%20MiniDots.R) : Extracts oxygen data to estimate dark respiration (DR) and gross photosynthetic rates (GP) of the samples.
