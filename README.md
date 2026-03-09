@@ -20,12 +20,14 @@ The raw observational data underlying this study are subject to a temporary emba
 All figures and figure panels presented in the manuscript were graphically post-processed for publication purposes. As a result, figures generated directly from the provided code may differ slightly in layout or formatting from those shown in the published article. However, the code reproduces all figures in their analytical (raw) form and fully replicates the underlying results.
 
 **Repository structure.**\
-📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures or use for meta-analyses.\
-• [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_1.xlsx) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_2.xlsx) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_3.xlsx) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_4.xlsx) • 
+📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the [Final Data](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data) needed to reproduce the figures or use for meta-analyses.\
+The [Raw Data](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Raw_data) is also available for running the analyses. It is divided into 6 groups of data: 1) Diving and Experiment logbook; 2) pH datasets; 3) Functions datasets; 4) Cover datasets; 5) Biomass datasets; and 6) PAR dataset.\
+Each data is a bit more detailed in [02_Load_Data.R script](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02_Load_Data.R) and each data is in RData format to get read easier and faster by R.
+• [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data/Data_Figure_1.xlsx) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data/Data_Figure_2.xlsx) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data/Data_Figure_3.xlsx) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data/Data_Figure_4.xlsx) • 
 
 📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
 The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. Once the raw data are released, these scripts will serve as the complete processing and analysis pipeline, from raw measurements to final results.\
-You only need to run the script [00. Control.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/00.%20Control.R). It will source the following 6 scripts and generated the raw figures and the data you need.
+You only need to run the script [00. Control.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/00.%20Control.R). It will source the following 6 scripts and will generate the raw figures and the data you need.
 Each script is documented and linked below:
 - [01. Packages & Functions](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/01_Packages_and_Functions.R): compile all the packages libraries needed and some hand-made functions for the purpose of this study.
 - [02. Load Data](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02_Load_Data.R): Extracts all the raw data needed to reproduce the analyses and the figures.
@@ -37,7 +39,7 @@ Each script is documented and linked below:
 As the raw observational data are not yet publicly available, the following scripts correspond to the figures in the manuscript and currently work with the processed data:\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_1_Script.R) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_2_Script.R) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_3_Script.R) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_4_Script.R) • 
 
-📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures. As stated before, the figures are post-processed but you can find the [raw figures]((https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Raw_Figures) as well.\
+📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures. As stated before, the figures are post-processed but you can find the [raw figures](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Raw_Figures) as well.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_1.png) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_2.png) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_3.png) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_4.png) • 
 
 ---
