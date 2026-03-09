@@ -20,31 +20,24 @@ The raw observational data underlying this study are subject to a temporary emba
 All figures and figure panels presented in the manuscript were graphically post-processed for publication purposes. As a result, figures generated directly from the provided code may differ slightly in layout or formatting from those shown in the published article. However, the code reproduces all figures in their analytical (raw) form and fully replicates the underlying results.
 
 **Repository structure.**\
-📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures.\
+📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the data needed to reproduce the figures or use for meta-analyses.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_1.xlsx) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_2.xlsx) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_3.xlsx) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Data_Figure_4.xlsx) • 
 
 📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
-The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. Once the raw data are released, these scripts will serve as the complete processing and analysis pipeline, from raw measurements to final results.
+The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. Once the raw data are released, these scripts will serve as the complete processing and analysis pipeline, from raw measurements to final results.\
+You only need to run the script [00. Control.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/00.%20Control.R). It will source the following 6 scripts and generated the raw figures and the data you need.
 Each script is documented and linked below:
-- [0. Titration_alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/00.%20Titration_alkalinity.R): Quantifies total alkalinity (AT) from processed titration samples.
-- [1. Quality_Check_O2_Sensors.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/01.%20Quality_Check_O2_Sensors.R): Formats and performs quality control on oxygen data obtained from sensors.
-- [2. MiniDots.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02.%20MiniDots.R) : Extracts oxygen data to estimate dark respiration (DR) and gross photosynthetic rates (GP) of the samples.
-- [3. Alkalinity.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/03.%20Alkalinity.R): Converts changes in total alkalinity into calcification rates.
-- [4. PI_Photo.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/04.%20PI_Photo.R): Derives the relationships between calcification rate (CR), dark respiration (DR), gross photosynthesis (GP), and irradiance (photosynthesis–irradiance curves).
-- [5. PAR_profiles.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/05.%20PAR_profiles.R): Extracts light (PAR) profiles recorded during incubation experiments.
-- [6. Vizualisation.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/06.%20Vizualisation.R): Visualizes the three pH conditions across the three study sites (Figure 1).
-- [7. Nutrients.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/07.%20Nutrients.R): Extracts and processes nutrient uptake data.
-- [8. Covers_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/08.%20Covers_communities.R): Quantifies community cover on experimental tiles across different sampling times.
-- [9. Biomass_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/09.%20Biomass_communities.R): Estimates community biomass on experimental tiles across sampling times (Figure 2).
-- [10. Conditions_T0.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/10.%20Conditions_T0.R): Defines initial (pre-experimental) conditions (Table 1).
-- [11. Changes_communities.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/11.%20Changes_communities.R): Quantifies temporal changes in ecosystem functions.
-- [12. Long-term.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/12.%20Long-term.R): Assesses long-term functional changes on historical tiles (Figure 4).
-- [13. Review.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/13.Review.R): Addresses reviewer comments from Round 1, including the generation of the revised Figure 3.
+- [01. Packages & Functions](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/01_Packages_and_Functions.R): compile all the packages libraries needed and some hand-made functions for the purpose of this study.
+- [02. Load Data](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02_Load_Data.R): Extracts all the raw data needed to reproduce the analyses and the figures.
+- [03. Initial Conditions](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/03_Initial_conditions.R): Define the experiment conditions (Table 1) and build Figure 1 output.
+- [04. Biomass Change](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/04_Biomass_Change.R): Explore the change in biomass over 130 days and build Figure 2 output.
+- [05. Transplant Change](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/05_Tranplant_change.R): Explore the change of 6 functional rates with the transplanted experiment and build Figure 3 output.
+- [06. Historical Change](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/06_Historical_change.R): Explore the change of 6 functional rates with the historical experiment and build Figure 4 output.
 
 As the raw observational data are not yet publicly available, the following scripts correspond to the figures in the manuscript and currently work with the processed data:\
-• [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_1_Script.R) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_2_Script.R) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_3_Script.R) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_4_Script.R) • 
+• [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_1_Script.R) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_2_Script.R) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_3_Script.R) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_4_Script.R) • 
 
-📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures.\
+📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures. As stated before, the figures are post-processed but you can find the [raw figures]((https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Raw_Figures) as well.\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_1.png) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_2.png) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_3.png) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_4.png) • 
 
 ---

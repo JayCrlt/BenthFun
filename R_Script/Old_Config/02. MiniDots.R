@@ -43,8 +43,7 @@ Summary_O2_historic <- data.frame(Tile       = rep(files_O2$Tile, 3),
 
 ## Define the ranking
 Tile_ranking <- Summary_O2_historic %>% dplyr::filter(incub_time == "Tn1 ", Process == "net photosynthesis rate") %>% arrange(-avg_output)
-Summary_O2_historic = Summary_O2_historic %>% group_by(Tile) %>% mutate(Tile = factor(Tile, levels = rev(Tile_ranking$Tile))) %>% arrange(Tile) %>% 
-  mutate(label = paste(Tile, Process, sep = " ")) # %>% mutate(label = factor(label, levels = rev(label))) %>% arrange(label) 
+Summary_O2_historic <- Summary_O2_historic %>% mutate(Tile = factor(Tile, levels = rev(unique(Tile_ranking$Tile))), label = paste(Tile, Process)) %>%arrange(Tile)
 
 Summary_O2_historic$pH_cond[Summary_O2_historic$pH_cond == " AMB"] = "ambient pH conditions"
 Summary_O2_historic$pH_cond[Summary_O2_historic$pH_cond == " ELOW"] = "extreme low pH conditions"
