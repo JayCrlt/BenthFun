@@ -27,18 +27,18 @@ The [Raw Data](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Raw_dat
 📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
 The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. To reproduce the analyses, simply run [00. Control.R](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/00.%20Control.R). This master script automatically sources the six subsequent scripts and generates the intermediate datasets as well as the raw figures required for the analyses.\
 Each script is documented and linked below:
-- [01. Packages & Functions](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/01_Packages_and_Functions.R): compile all the packages libraries needed and some hand-made functions for the purpose of this study.
-- [02. Load Data](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02_Load_Data.R): Extracts all the raw data needed to reproduce the analyses and the figures.
-- [03. Initial Conditions](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/03_Initial_conditions.R): Define the experiment conditions (Table 1) and build Figure 1 output.
-- [04. Biomass Change](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/04_Biomass_Change.R): Explore the change in biomass over 130 days and build Figure 2 output.
-- [05. Transplant Change](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/05_Tranplant_change.R): Explore the change of 6 functional rates with the transplanted experiment and build Figure 3 output.
-- [06. Historical Change](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/06_Historical_change.R): Explore the change of 6 functional rates with the historical experiment and build Figure 4 output.
+- [01. Packages & Functions](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/01_Packages_and_Functions.R): Compiles all required package libraries and loads the custom functions developed for this study.
+- [02. Load Data](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02_Load_Data.R): Extracts all raw datasets required to reproduce the analyses and figures.
+- [03. Initial Conditions](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/03_Initial_conditions.R): Defines the experimental conditions (Table 1) and generates the output for Figure 1.
+- [04. Biomass Change](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/04_Biomass_Change.R): Explores biomass changes over the 130-day experiment and generates the output for Figure 2.
+- [05. Transplant Change](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/05_Tranplant_change.R): Explores changes in six functional rates in the transplant experiment and generates the output for Figure 3.
+- [06. Historical Change](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/06_Historical_change.R): Explores changes in six functional rates in the historical experiment and generates the output for Figure 4.
 
 As the raw observational data are not yet publicly available, the following scripts correspond to the figures in the manuscript and currently work with the processed data:\
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_1_Script.R) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_2_Script.R) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_3_Script.R) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/Figure_reproducibility/Figure_4_Script.R) • 
 
 📁 [`Outputs`](https://github.com/JayCrlt/BenthFun/tree/main/Outputs) hosts the main figures. As stated before, the figures are post-processed but you can find the [raw figures](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Raw_Figures) as well.\
-• [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_1.png) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_2.png) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_3.png) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/PNG/Figure_4.png) • 
+• [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/Figure_1.png) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/Figure_2.png) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/Figure_3.png) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Outputs/Figures/Final_Figures/Figure_4.png) • 
 
 ---
 **System informations**
