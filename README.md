@@ -21,9 +21,8 @@ All figures and figure panels presented in the manuscript were graphically post-
 
 **Repository structure.**\
 📁 [`Data`](https://github.com/JayCrlt/BenthFun/tree/main/Data_Online) is the folder where you might find the [Final Data](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data) needed to reproduce the figures or use for meta-analyses.\
-The [Raw Data](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Raw_data) is also available for running the analyses. It is divided into 6 groups of data: 1) Diving and Experiment logbook; 2) pH datasets; 3) Functions datasets; 4) Cover datasets; 5) Biomass datasets; and 6) PAR dataset.\
-Each data is a bit more detailed in [02_Load_Data.R script](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02_Load_Data.R) and each data is in RData format to get read easier and faster by R.
 • [Figure 1](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data/Data_Figure_1.xlsx) • [Figure 2](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data/Data_Figure_2.xlsx) • [Figure 3](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data/Data_Figure_3.xlsx) • [Figure 4](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Final_data/Data_Figure_4.xlsx) • 
+The [Raw Data](https://github.com/JayCrlt/BenthFun/blob/main/Data_Online/Raw_data) is also available for running the analyses. It is divided into 6 groups of data: 1) Diving and Experiment logbook; 2) pH datasets; 3) Functions datasets; 4) Cover datasets; 5) Biomass datasets; and 6) PAR dataset. Each data is a bit more detailed in [02_Load_Data.R script](https://github.com/JayCrlt/BenthFun/blob/main/R_Script/02_Load_Data.R) and each data is in RData format to get read easier and faster by R.
 
 📁 [`R_Script`](https://github.com/JayCrlt/BenthFun/tree/main/R_Script) hosts the scripts used for the current analyses.\
 The analysis scripts are indexed and correspond to the different phases of the project conducted over the past two years. Once the raw data are released, these scripts will serve as the complete processing and analysis pipeline, from raw measurements to final results.\
