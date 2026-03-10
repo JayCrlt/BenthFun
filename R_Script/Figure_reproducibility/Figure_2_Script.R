@@ -1,7 +1,7 @@
 rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(ggridges) ; library(readxl)
 ## Figure 2
 
-data <- read_excel("Data_Online/Data_Figure_2.xlsx", sheet = 1)
+data <- read_excel("Data_Online/Final_data/Data_Figure_2.xlsx", sheet = 1)
 # Function to create plot by community
 plot_community <- function(data, community_name) {
   comm_data <- data %>% filter(Communities == community_name)
@@ -55,12 +55,9 @@ D <- ggplot(data_lolipop, aes(y = Biomass, x = x_location)) +
   geom_segment(aes(x = x_location, xend = x_location, y = 1, yend = Biomass, color = pH), size = 0.8, show.legend = F) +
   geom_point(aes(shape = Communities, fill = pH), size = 3, color = "black", show.legend = F) +
   geom_hline(yintercept = 1, linetype = "dotted", color = "black", size = 0.5) +
-  scale_color_manual(values=c("firebrick2","goldenrod1","royalblue3"),
-                     labels = c("Extreme Low", "Low", "Ambient")) +
-  scale_fill_manual(values=c("firebrick2","goldenrod1","royalblue3"),
-                    labels = c("Extreme Low", "Low", "Ambient")) +
-  scale_shape_manual(values=c(21, 23, 24),
-                     labels = c("Encrusting", "Mixed", "Forest")) +
+  scale_color_manual(values=c("royalblue3", "firebrick2", "goldenrod1"), labels = c("AMB", "ELO", "LOW")) +
+  scale_fill_manual(values=c("royalblue3", "firebrick2", "goldenrod1"), labels = c("AMB", "ELO", "LOW")) +
+  scale_shape_manual(values=c(24, 21, 23), labels = c("Encrusting", "Mixed", "Forest")) +
   scale_y_continuous(name = expression("Biomass change at"~T[3]),
                      breaks = seq(0, 1.2, 0.2),
                      limits = c(0, 1.2),

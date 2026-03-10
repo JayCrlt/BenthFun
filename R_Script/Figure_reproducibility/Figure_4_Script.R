@@ -1,7 +1,7 @@
 rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(ggridges) ; library(readxl)
 ## Figure 4
 
-Historic_Change_Final <- read_excel("Data_Online/Data_Figure_4.xlsx", sheet = 1)
+Historic_Change_Final <- read_excel("Data_Online/Final_data/Data_Figure_4.xlsx", sheet = 1)
 
 # Define themes
 theme_extreme_low <- function(panel_background_color = "gray20") {

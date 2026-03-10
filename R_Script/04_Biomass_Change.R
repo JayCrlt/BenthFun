@@ -258,7 +258,7 @@ Fig_2D = ggplot(data_lolipop, aes(y = Biomass, x = x_location)) +
   geom_point(aes(shape = Communities, fill = pH), size = 3, color = "black", show.legend = F) +
   scale_color_manual(values=c("royalblue3", "firebrick2", "goldenrod1"), labels = c("Ambient", "Extreme Low", "Low")) +
   scale_fill_manual(values=c("royalblue3", "firebrick2", "goldenrod1"), labels = c("Ambient", "Extreme Low", "Low")) +
-  scale_shape_manual(values=c(21, 23, 24), labels = c("Encrusting", "Mixed", "Forest")) +
+  scale_shape_manual(values=c(24, 21, 23), labels = c("Encrusting", "Mixed", "Forest")) +
   scale_y_continuous(name = expression("Biomass change at"~T[3]), breaks = seq(0, 1.2, 0.2), limits = c(0, 1.2), 
                      expand = c(0.02,0), labels = c("-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "+0.2")) +
   scale_x_continuous(name = "", limits = c(0, 12), expand = c(0.02,0)) +

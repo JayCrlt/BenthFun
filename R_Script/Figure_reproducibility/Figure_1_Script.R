@@ -1,7 +1,7 @@
 rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(ggridges) ; library(xlsx)
 ## Figure 1
 
-(Figure_1 = xlsx::read.xlsx("Data_Online/Data_Figure_1.xlsx", sheetName = "Sheet1") %>% 
+(Figure_1 = xlsx::read.xlsx("Data_Online/Final_data/Data_Figure_1.xlsx", sheetName = "Sheet1") %>% 
   mutate(Site = fct_recode(Site, "Extreme low" = "extreme_low", "Low" = "low", "Ambient" = "amb")) %>% 
   mutate(Site = factor(Site, levels = c("Ambient", "Low", "Extreme low"))) %>%
   ggplot(aes(x = pH, y = Site)) +

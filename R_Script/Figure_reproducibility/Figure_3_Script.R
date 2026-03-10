@@ -1,7 +1,7 @@
 rm(list = ls()) ; options(cores = 4, warn = -1) ; library(tidyverse) ; library(patchwork) ; library(forcats) ; library(readxl)
 ## Figure 3
 
-data <- read_excel("Data_Online/Data_Figure_3.xlsx", sheet = 1)
+data <- read_excel("Data_Online/Final_data/Data_Figure_3.xlsx", sheet = 1)
 # Prepare data
 data_plot <- data %>%
   filter(`Number of days` == max(`Number of days`)) %>% 
@@ -138,10 +138,11 @@ NO3_1 = data_plot %>% filter(Function == "NO3" & pH != "ELOW") %>%
   ggplot(aes(y = y_value, x = `Estimate ratio`)) +
   geom_linerange(aes(xmin = `Estimate ratio` - `Est.Error ratio`,  xmax = `Estimate ratio` + `Est.Error ratio`, color = pH), 
                  size = 1.2, show.legend = F) +
-  geom_point(aes(shape = Comm, fill = pH), color = "black", size = 3, show.legend = F) +
+  geom_point(aes(x = `Estimate ratio`, shape = Comm, fill = ifelse(`Estimate ratio` - `Est.Error ratio` < 0, "white", as.character(pH))),
+             size = 4, color = "black", size = 3, show.legend = F) +
   geom_vline(xintercept = 0, linetype = "dotted", color = "black") +
   scale_color_manual(values = c("LOW" = "goldenrod1", "AMB" = "royalblue3")) +
-  scale_fill_manual(values = c("LOW" = "goldenrod1", "AMB" = "royalblue3")) +
+  scale_fill_manual(values = c("LOW" = "goldenrod1", "AMB" = "royalblue3", white = "white")) +
   scale_shape_manual(values = c("Fleshy" = 21, "Mixed" = 23, "Calcifying" = 24)) +
   scale_x_reverse(limits = c(-5, 40),breaks = c(10, 40), sec.axis = 
                     sec_axis(~ ., name = "NO3 uptake", breaks = c(10, 40), labels = c(-30, -120))) +
