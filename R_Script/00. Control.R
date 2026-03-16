@@ -2,7 +2,6 @@
 ############################################################ Source Scripts #############################################################
 #########################################################################################################################################
 
-rm(list = ls())
 source("R_Script/01_Packages_and_Functions.R") # Set up environment
 source("R_Script/02_Load_Data.R")              # Load data sets
 source("R_Script/03_Initial_conditions.R")     # Figure 1 and Table 1
